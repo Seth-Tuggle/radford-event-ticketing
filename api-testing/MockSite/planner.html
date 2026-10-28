@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Highland Pass | Week Planner</title>
+  <link rel="stylesheet" href="mocksite.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="site-header" data-reveal="1">
+      <div class="site-header-inner">
+        <a class="brand" href="index.html">
+          <span class="brand-mark">HP</span>
+          <span class="brand-text">
+            <span class="brand-title">Highland Pass</span>
+            <span class="brand-subtitle">Plan the next seven days</span>
+          </span>
+        </a>
+        <nav class="nav-links" aria-label="Primary">
+          <a class="nav-link" href="index.html">Discover</a>
+          <a class="nav-link is-active" href="planner.html">Week Planner</a>
+          <a class="nav-link" href="organizer.html">Organizer Studio</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero-panel" data-reveal="2">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Date route in action</span>
+            <h1 class="hero-title">Stretch the week. Pull the right window.</h1>
+            <p class="hero-lead">
+              This planner screen is built around the date-range API. Use presets for today, the weekend, or the next seven days, then scan grouped results like a real planning surface.
+            </p>
+            <div class="preset-row">
+              <button class="button-soft" type="button" id="presetTodayBtn">Today</button>
+              <button class="button-soft" type="button" id="presetWeekendBtn">Weekend</button>
+              <button class="button" type="button" id="presetWeekBtn">Next 7 days</button>
+            </div>
+          </div>
+
+          <aside class="hero-card">
+            <h3>Planner controls</h3>
+            <form id="plannerForm" class="filter-shell">
+              <div class="field-grid">
+                <div class="field field-span-6">
+                  <label for="singleDate">Single day</label>
+                  <input id="singleDate" type="date">
+                </div>
+                <div class="field field-span-6">
+                  <label for="typeSelect">Type</label>
+                  <select id="typeSelect">
+                    <option value="both" selected>both</option>
+                    <option value="start">start</option>
+                    <option value="end">end</option>
+                  </select>
+                </div>
+                <div class="field field-span-6">
+                  <label for="startDate">Start date</label>
+                  <input id="startDate" type="date">
+                </div>
+                <div class="field field-span-6">
+                  <label for="endDate">End date</label>
+                  <input id="endDate" type="date">
+                </div>
+                <div class="field field-span-6">
+                  <label for="limitSelect">Limit</label>
+                  <select id="limitSelect">
+                    <option value="8">8</option>
+                    <option value="12" selected>12</option>
+                    <option value="20">20</option>
+                  </select>
+                </div>
+              </div>
+              <div class="action-row">
+                <button class="button" type="submit">Refresh planner</button>
+                <button class="button-soft" type="button" id="resetPlannerBtn">Reset</button>
+              </div>
+            </form>
+            <div id="plannerStatus" class="status-banner info is-visible">Loading the next seven days...</div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="kpi-grid" data-reveal="3">
+        <article class="kpi-card">
+          <div class="kpi-label">Cards in range</div>
+          <div class="kpi-value" id="statCount">-</div>
+          <div class="kpi-trend">The current planner window.</div>
+        </article>
+        <article class="kpi-card">
+          <div class="kpi-label">Days represented</div>
+          <div class="kpi-value" id="statDays">-</div>
+          <div class="kpi-trend">Grouped day sections in the timeline.</div>
+        </article>
+        <article class="kpi-card">
+          <div class="kpi-label">Leading vibe</div>
+          <div class="kpi-value" id="statVibe">-</div>
+          <div class="kpi-trend">Most common category in this range.</div>
+        </article>
+        <article class="kpi-card">
+          <div class="kpi-label">Window mode</div>
+          <div class="kpi-value" id="statMode">Range</div>
+          <div class="kpi-trend">Single-day or date-window behavior.</div>
+        </article>
+      </section>
+
+      <section class="section" data-reveal="4">
+        <div class="layout-grid">
+          <div class="timeline-panel">
+            <div class="section-head">
+              <div>
+                <div class="eyebrow">Timeline</div>
+                <h2 class="section-title" id="timelineTitle">Next seven days</h2>
+              </div>
+              <div class="section-copy" id="timelineCopy">
+                Grouped planner cards for the current date query.
+              </div>
+            </div>
+            <div id="timelineRoot" class="stack"></div>
+          </div>
+
+          <aside class="stack">
+            <section class="summary-panel">
+              <div class="section-head">
+                <div>
+                  <div class="eyebrow">Top lanes</div>
+                  <h3 class="panel-title">Category mix</h3>
+                </div>
+              </div>
+              <div id="categoryMix" class="stack"></div>
+            </section>
+
+            <section class="info-panel">
+              <div class="section-head">
+                <div>
+                  <div class="eyebrow">How to use it</div>
+                  <h3 class="panel-title">Planner notes</h3>
+                </div>
+              </div>
+              <div class="checklist">
+                <div class="checklist-item">Use <strong>single day</strong> for a compact one-day slate.</div>
+                <div class="checklist-item">Use <strong>type=start</strong> or <strong>type=end</strong> when you want one edge of the window to matter more.</div>
+                <div class="checklist-item">Open any card to jump into the richer event detail view.</div>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div>Planner mock page powered by the date-range event API.</div>
+    </footer>
+  </div>
+
+  <script src="mocksite.js"></script>
+  <script>
+    (function () {
+      var App = window.MockSite;
+      var safe = App.escapeHtml;
+
+      var refs = {
+        plannerForm: document.getElementById("plannerForm"),
+        singleDate: document.getElementById("singleDate"),
+        typeSelect: document.getElementById("typeSelect"),
+        startDate: document.getElementById("startDate"),
+        endDate: document.getElementById("endDate"),
+        limitSelect: document.getElementById("limitSelect"),
+        resetPlannerBtn: document.getElementById("resetPlannerBtn"),
+        presetTodayBtn: document.getElementById("presetTodayBtn"),
+        presetWeekendBtn: document.getElementById("presetWeekendBtn"),
+        presetWeekBtn: document.getElementById("presetWeekBtn"),
+        plannerStatus: document.getElementById("plannerStatus"),
+        statCount: document.getElementById("statCount"),
+        statDays: document.getElementById("statDays"),
+        statVibe: document.getElementById("statVibe"),
+        statMode: document.getElementById("statMode"),
+        timelineTitle: document.getElementById("timelineTitle"),
+        timelineCopy: document.getElementById("timelineCopy"),
+        timelineRoot: document.getElementById("timelineRoot"),
+        categoryMix: document.getElementById("categoryMix")
+      };
+
+      function setStatus(type, message) {
+        refs.plannerStatus.className = "status-banner is-visible " + type;
+        refs.plannerStatus.textContent = message;
+      }
+
+      function setRange(startDate, endDate, singleDate) {
+        refs.startDate.value = startDate || "";
+        refs.endDate.value = endDate || "";
+        refs.singleDate.value = singleDate || "";
+      }
+
+      function renderStats(items, groups, mode) {
+        refs.statCount.textContent = String(items.length);
+        refs.statDays.textContent = String(groups.length);
+        refs.statMode.textContent = mode;
+        var topCategory = App.summarizeCategories(items)[0];
+        refs.statVibe.textContent = topCategory ? topCategory.category : "None";
+      }
+
+      function renderCategoryMix(items) {
+        refs.categoryMix.innerHTML = "";
+        var summaries = App.summarizeCategories(items).slice(0, 5);
+        if (!summaries.length) {
+          refs.categoryMix.innerHTML = "<div class='empty-state'>No category mix available for this range.</div>";
+          return;
+        }
+
+        summaries.forEach(function (entry) {
+          var card = document.createElement("article");
+          card.className = "mini-card";
+          card.innerHTML =
+            "<h4>" + safe(entry.category) + "</h4>" +
+            "<div class='kpi-value'>" + entry.count + "</div>" +
+            "<div class='helper'>Events in the current range.</div>";
+          refs.categoryMix.appendChild(card);
+        });
+      }
+
+      function renderTimeline(items, modeLabel) {
+        refs.timelineRoot.innerHTML = "";
+        var groups = App.groupEventsByDay(items);
+
+        refs.timelineTitle.textContent = modeLabel;
+        refs.timelineCopy.textContent = items.length
+          ? "Grouped planner cards for the current date query."
+          : "No events landed in this window.";
+
+        if (!groups.length) {
+          refs.timelineRoot.innerHTML = "<div class='empty-state'>No events were returned for this planner window.</div>";
+          renderStats([], [], modeLabel);
+          renderCategoryMix([]);
+          return;
+        }
+
+        groups.forEach(function (group) {
+          var section = document.createElement("section");
+          section.className = "timeline-day";
+
+          var header = document.createElement("div");
+          header.className = "timeline-day-header";
+          header.innerHTML =
+            "<div>" +
+              "<h3 class='timeline-day-title'>" + safe(group.title) + "</h3>" +
+              "<div class='helper'>" + group.items.length + " event" + (group.items.length === 1 ? "" : "s") + "</div>" +
+            "</div>";
+          section.appendChild(header);
+
+          var list = document.createElement("div");
+          list.className = "timeline-list";
+          group.items.forEach(function (item) {
+            var card = document.createElement("article");
+            card.className = "timeline-card";
+            card.innerHTML =
+              "<div class='time'>" + safe(App.formatDateTime(item.date_time || item.start_date_time || item.start_time)) + "</div>" +
+              "<h4>" + safe(App.readText(item.event_name, "Untitled event")) + "</h4>" +
+              "<div class='timeline-note'>" + safe(App.readText(item.location, "Location TBD")) + "</div>" +
+              "<div class='action-row'>" +
+                "<span class='status-pill'>" + safe(App.formatPriceSummary(item)) + "</span>" +
+                "<a class='button-ghost' href='event.html?id=" + encodeURIComponent(App.pickEventId(item)) + "'>Open</a>" +
+              "</div>";
+            list.appendChild(card);
+          });
+          section.appendChild(list);
+          refs.timelineRoot.appendChild(section);
+        });
+
+        renderStats(items, groups, modeLabel);
+        renderCategoryMix(items);
+      }
+
+      async function runPlanner() {
+        var singleDate = refs.singleDate.value.trim();
+        var startDate = refs.startDate.value.trim();
+        var endDate = refs.endDate.value.trim();
+        var type = refs.typeSelect.value.trim() || "both";
+        var limit = Number(refs.limitSelect.value || 12);
+        var options;
+        var modeLabel;
+
+        if (singleDate) {
+          options = {
+            date: singleDate,
+            type: type,
+            limit: limit
+          };
+          modeLabel = "Single day";
+        } else {
+          if (!startDate || !endDate) {
+            setStatus("error", "Choose a single day or fill both start and end dates.");
+            return;
+          }
+          options = {
+            startDate: startDate,
+            endDate: endDate,
+            type: type,
+            limit: limit
+          };
+          modeLabel = "Date range";
+        }
+
+        setStatus("info", "Loading the planner window...");
+        try {
+          var payload = await App.fetchByDate(options);
+          renderTimeline(App.pickItems(payload), modeLabel);
+          setStatus("success", "Planner window updated.");
+        } catch (error) {
+          setStatus("error", "Could not load planner data: " + error.message);
+        }
+      }
+
+      function applyTodayPreset() {
+        var today = App.startOfToday();
+        var todayValue = App.formatDateInput(today);
+        setRange("", "", todayValue);
+        refs.typeSelect.value = "both";
+        refs.limitSelect.value = "8";
+      }
+
+      function applyWeekendPreset() {
+        var today = App.startOfToday();
+        var day = today.getDay();
+        var saturdayOffset = ((6 - day) + 7) % 7;
+        var saturday = App.addDays(today, saturdayOffset);
+        var sunday = App.addDays(saturday, 1);
+        setRange(App.formatDateInput(saturday), App.formatDateInput(sunday), "");
+        refs.typeSelect.value = "both";
+        refs.limitSelect.value = "12";
+      }
+
+      function applyWeekPreset() {
+        var today = App.startOfToday();
+        var end = App.addDays(today, 6);
+        setRange(App.formatDateInput(today), App.formatDateInput(end), "");
+        refs.typeSelect.value = "both";
+        refs.limitSelect.value = "12";
+      }
+
+      refs.plannerForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        runPlanner();
+      });
+
+      refs.resetPlannerBtn.addEventListener("click", function () {
+        applyWeekPreset();
+        runPlanner();
+      });
+
+      refs.presetTodayBtn.addEventListener("click", function () {
+        applyTodayPreset();
+        runPlanner();
+      });
+
+      refs.presetWeekendBtn.addEventListener("click", function () {
+        applyWeekendPreset();
+        runPlanner();
+      });
+
+      refs.presetWeekBtn.addEventListener("click", function () {
+        applyWeekPreset();
+        runPlanner();
+      });
+
+      applyWeekPreset();
+      runPlanner();
+    }());
+  </script>
+</body>
+</html>

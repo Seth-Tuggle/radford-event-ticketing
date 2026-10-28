@@ -1,0 +1,25 @@
+<!doctype html>
+<!--
+  index.html — Vite entry point for the React single-page app.
+
+  This file is intentionally tiny: Vite serves it as-is, then loads
+  /src/main.jsx as an ES module. main.jsx mounts <App/> into #root,
+  and React Router handles all client-side routing from there.
+
+  The static seat-map page (public/venue.html) is served separately
+  and is NOT part of the React tree — see the project README for the
+  full architecture diagram.
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Radford Events Ticketing</title>
+  </head>
+  <body>
+    <!-- React mounts here. See src/main.jsx. -->
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

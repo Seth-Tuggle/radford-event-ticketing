@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Highland Pass | Discover Campus Events</title>
+  <link rel="stylesheet" href="mocksite.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="site-header" data-reveal="1">
+      <div class="site-header-inner">
+        <a class="brand" href="index.html">
+          <span class="brand-mark">HP</span>
+          <span class="brand-text">
+            <span class="brand-title">Highland Pass</span>
+            <span class="brand-subtitle">Radford's live event layer</span>
+          </span>
+        </a>
+        <nav class="nav-links" aria-label="Primary">
+          <a class="nav-link is-active" href="index.html">Discover</a>
+          <a class="nav-link" href="planner.html">Week Planner</a>
+          <a class="nav-link" href="organizer.html">Organizer Studio</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero-panel" data-reveal="2">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Campus pulse, live</span>
+            <h1 class="hero-title">Find the room everyone talks about tomorrow.</h1>
+            <p class="hero-lead">
+              Highland Pass turns the event APIs into a real front door for campus life. Search by keyword, jump by vibe, or just scan what is happening next.
+            </p>
+            <div class="hero-actions">
+              <a class="button" href="#discover-results">Browse live events</a>
+              <a class="button-soft" href="planner.html">Plan the week</a>
+            </div>
+          </div>
+          <aside class="hero-card">
+            <h3>Discover in one move</h3>
+            <form id="discoverForm" class="search-shell">
+              <div class="field">
+                <label for="searchQuery">Search for a moment</label>
+                <input id="searchQuery" type="text" placeholder="concert, honors, alumni night">
+              </div>
+              <div class="field-grid">
+                <div class="field field-span-6">
+                  <label for="searchCategory">Category</label>
+                  <select id="searchCategory">
+                    <option value="">Any vibe</option>
+                  </select>
+                </div>
+                <div class="field field-span-6">
+                  <label for="searchLimit">Limit</label>
+                  <select id="searchLimit">
+                    <option value="6">6 cards</option>
+                    <option value="9" selected>9 cards</option>
+                    <option value="12">12 cards</option>
+                  </select>
+                </div>
+              </div>
+              <div class="action-row">
+                <button class="button" type="submit">Refresh feed</button>
+                <button class="button-soft" type="button" id="resetDiscoverBtn">Reset</button>
+              </div>
+            </form>
+            <div id="discoverStatus" class="status-banner info is-visible">Loading upcoming events...</div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="kpi-grid" data-reveal="3">
+        <article class="kpi-card">
+          <div class="kpi-label">Upcoming now</div>
+          <div class="kpi-value" id="kpiUpcoming">-</div>
+          <div class="kpi-trend">Pulled from the live upcoming-events route.</div>
+        </article>
+        <article class="kpi-card">
+          <div class="kpi-label">This week</div>
+          <div class="kpi-value" id="kpiWeek">-</div>
+          <div class="kpi-trend">Based on the date-range API for the next 7 days.</div>
+        </article>
+        <article class="kpi-card">
+          <div class="kpi-label">Top category</div>
+          <div class="kpi-value" id="kpiTopCategory">-</div>
+          <div class="kpi-trend">What shows up most in the next wave of events.</div>
+        </article>
+        <article class="kpi-card">
+          <div class="kpi-label">Discovery mode</div>
+          <div class="kpi-value" id="kpiMode">Live</div>
+          <div class="kpi-trend">Blank search lists upcoming events automatically.</div>
+        </article>
+      </section>
+
+      <section class="section" data-reveal="3">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Spotlight</div>
+            <h2 class="section-title">One event worth opening right now</h2>
+          </div>
+          <div class="section-copy">
+            The spotlight card is fed by the same live event payload as the browse grid, just treated like a flagship moment.
+          </div>
+        </div>
+        <div id="spotlightRoot" class="spotlight-grid"></div>
+      </section>
+
+      <section class="section" data-reveal="4">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Quick pivots</div>
+            <h2 class="section-title">Jump by mood</h2>
+          </div>
+          <div class="section-copy">
+            These buttons hit the category route so the page behaves more like a real discovery app than a generic test panel.
+          </div>
+        </div>
+        <div id="quickCategoryRow" class="chip-row"></div>
+      </section>
+
+      <section class="section" id="discover-results" data-reveal="4">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Discover</div>
+            <h2 class="section-title" id="resultsTitle">Upcoming at a glance</h2>
+          </div>
+          <div class="section-copy" id="resultsCopy">
+            A live feed of upcoming, non-cancelled events.
+          </div>
+        </div>
+
+        <div class="layout-grid">
+          <div class="stack">
+            <div id="resultsGrid" class="card-grid"></div>
+          </div>
+
+          <aside class="stack">
+            <section class="info-panel">
+              <div class="section-head">
+                <div>
+                  <div class="eyebrow">Week peek</div>
+                  <h3 class="panel-title">What the next seven days feel like</h3>
+                </div>
+              </div>
+              <div id="weekPeek" class="timeline-list"></div>
+            </section>
+
+            <section class="summary-panel">
+              <div class="section-head">
+                <div>
+                  <div class="eyebrow">Signal board</div>
+                  <h3 class="panel-title">Category pressure</h3>
+                </div>
+              </div>
+              <div id="signalBoard" class="stack"></div>
+            </section>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div>Mock application pages for the Team02 event APIs.</div>
+      <div>Discover, planner, and organizer views all run against the same production-stage endpoints.</div>
+    </footer>
+  </div>
+
+  <script src="mocksite.js"></script>
+  <script>
+    (function () {
+      var App = window.MockSite;
+      var safe = App.escapeHtml;
+      var state = {
+        upcomingItems: [],
+        weekItems: [],
+        displayedItems: []
+      };
+
+      var refs = {
+        searchQuery: document.getElementById("searchQuery"),
+        searchCategory: document.getElementById("searchCategory"),
+        searchLimit: document.getElementById("searchLimit"),
+        discoverForm: document.getElementById("discoverForm"),
+        resetDiscoverBtn: document.getElementById("resetDiscoverBtn"),
+        discoverStatus: document.getElementById("discoverStatus"),
+        spotlightRoot: document.getElementById("spotlightRoot"),
+        resultsGrid: document.getElementById("resultsGrid"),
+        quickCategoryRow: document.getElementById("quickCategoryRow"),
+        weekPeek: document.getElementById("weekPeek"),
+        signalBoard: document.getElementById("signalBoard"),
+        resultsTitle: document.getElementById("resultsTitle"),
+        resultsCopy: document.getElementById("resultsCopy"),
+        kpiUpcoming: document.getElementById("kpiUpcoming"),
+        kpiWeek: document.getElementById("kpiWeek"),
+        kpiTopCategory: document.getElementById("kpiTopCategory"),
+        kpiMode: document.getElementById("kpiMode")
+      };
+
+      function setStatus(type, message) {
+        refs.discoverStatus.className = "status-banner is-visible " + type;
+        refs.discoverStatus.textContent = message;
+      }
+
+      function buildSignalBoard(items) {
+        refs.signalBoard.innerHTML = "";
+        var summaries = App.summarizeCategories(items).slice(0, 4);
+        if (summaries.length === 0) {
+          refs.signalBoard.innerHTML = "<div class='empty-state'>No category signals yet.</div>";
+          return;
+        }
+
+        summaries.forEach(function (entry) {
+          var card = document.createElement("article");
+          card.className = "mini-card";
+          card.innerHTML =
+            "<h4>" + safe(entry.category) + "</h4>" +
+            "<div class='kpi-value'>" + entry.count + "</div>" +
+            "<div class='helper'>Live cards in the current set.</div>";
+          refs.signalBoard.appendChild(card);
+        });
+      }
+
+      function buildWeekPeek(items) {
+        refs.weekPeek.innerHTML = "";
+        if (!items.length) {
+          refs.weekPeek.innerHTML = "<div class='empty-state'>No week-ahead events came back.</div>";
+          return;
+        }
+
+        App.groupEventsByDay(items).slice(0, 4).forEach(function (group) {
+          var card = document.createElement("article");
+          card.className = "timeline-card";
+          card.innerHTML =
+            "<div class='time'>" + safe(group.title) + "</div>" +
+            "<h4>" + group.items.length + " event" + (group.items.length === 1 ? "" : "s") + "</h4>" +
+            "<div class='timeline-note'>" + safe(App.readText(group.items[0].event_name, "No title")) + "</div>";
+          refs.weekPeek.appendChild(card);
+        });
+      }
+
+      function buildSpotlight(items) {
+        refs.spotlightRoot.innerHTML = "";
+
+        if (!items.length) {
+          refs.spotlightRoot.innerHTML = "<div class='empty-state'>No event is ready for spotlight yet.</div>";
+          return;
+        }
+
+        var featured = items[0];
+        var related = items.slice(1, 4);
+
+        var featureCard = document.createElement("article");
+        featureCard.className = "spotlight-card";
+        featureCard.innerHTML =
+          "<div class='spotlight-media'>" +
+            "<img src=\"" + App.pickHero(featured) + "\" alt='Featured event image'>" +
+            "<div class='spotlight-overlay'>" +
+              "<div class='eyebrow'>Featured now</div>" +
+              "<h3 class='spotlight-title'>" + safe(App.readText(featured.event_name, "Untitled event")) + "</h3>" +
+              "<p>" + safe(App.truncateText(featured.description, 160)) + "</p>" +
+            "</div>" +
+          "</div>" +
+          "<div class='detail-meta-grid'>" +
+            "<div class='meta-card'><div class='meta-label'>When</div><strong>" + safe(App.formatDateTime(featured.date_time)) + "</strong></div>" +
+            "<div class='meta-card'><div class='meta-label'>Where</div><strong>" + safe(App.readText(featured.location, "Location TBD")) + "</strong></div>" +
+          "</div>" +
+          "<div class='action-row'>" +
+            "<a class='button' href='event.html?id=" + encodeURIComponent(App.pickEventId(featured)) + "'>Open event</a>" +
+            "<span class='status-pill'>" + safe(App.formatPriceSummary(featured)) + "</span>" +
+          "</div>";
+        refs.spotlightRoot.appendChild(featureCard);
+
+        var stack = document.createElement("div");
+        stack.className = "stack";
+        if (!related.length) {
+          stack.innerHTML = "<div class='empty-state'>More events will appear here as the API returns them.</div>";
+        } else {
+          related.forEach(function (item) {
+            var card = document.createElement("article");
+            card.className = "feature-card";
+            card.innerHTML =
+              "<div class='eyebrow'>" + safe(App.toList(item.categories)[0] || "Campus pick") + "</div>" +
+              "<h3 class='panel-title'>" + safe(App.readText(item.event_name, "Untitled event")) + "</h3>" +
+              "<div class='helper'>" + safe(App.formatDateTime(item.date_time)) + "</div>" +
+              "<div class='rich-copy'>" + safe(App.truncateText(item.description, 90)) + "</div>" +
+              "<div class='action-row'>" +
+                "<a class='button-ghost' href='event.html?id=" + encodeURIComponent(App.pickEventId(item)) + "'>Preview</a>" +
+                "<span class='status-pill warning'>" + safe(App.formatPriceSummary(item)) + "</span>" +
+              "</div>";
+            stack.appendChild(card);
+          });
+        }
+        refs.spotlightRoot.appendChild(stack);
+      }
+
+      function renderResults(items, title, copy, modeLabel) {
+        refs.resultsGrid.innerHTML = "";
+        refs.resultsTitle.textContent = title;
+        refs.resultsCopy.textContent = copy;
+        refs.kpiMode.textContent = modeLabel;
+        state.displayedItems = items.slice();
+
+        if (!items.length) {
+          refs.resultsGrid.innerHTML = "<div class='empty-state'>No events matched this filter.</div>";
+          buildSignalBoard([]);
+          return;
+        }
+
+        items.forEach(function (item) {
+          refs.resultsGrid.appendChild(App.createEventCard(item));
+        });
+
+        buildSignalBoard(items);
+      }
+
+      function populateCategoryControls() {
+        App.CATEGORIES.forEach(function (category) {
+          var option = document.createElement("option");
+          option.value = category;
+          option.textContent = category;
+          refs.searchCategory.appendChild(option);
+        });
+
+        ["Music", "Conference", "Basketball", "Academic", "Sports", "Performance"].forEach(function (category, index) {
+          var button = document.createElement("button");
+          button.type = "button";
+          button.className = "chip";
+          button.textContent = category;
+          button.setAttribute("data-index", index + 1);
+          button.addEventListener("click", function () {
+            refs.searchQuery.value = "";
+            refs.searchCategory.value = category;
+            runDiscovery("category");
+            Array.from(refs.quickCategoryRow.children).forEach(function (child) {
+              child.classList.toggle("is-active", child === button);
+            });
+          });
+          refs.quickCategoryRow.appendChild(button);
+        });
+      }
+
+      function refreshKpis() {
+        refs.kpiUpcoming.textContent = String(state.upcomingItems.length || 0);
+        refs.kpiWeek.textContent = String(state.weekItems.length || 0);
+        var topCategory = App.summarizeCategories(state.weekItems)[0];
+        refs.kpiTopCategory.textContent = topCategory ? topCategory.category : "None yet";
+      }
+
+      async function loadHome() {
+        var today = App.startOfToday();
+        var weekEnd = App.addDays(today, 6);
+        setStatus("info", "Loading upcoming events and this week's rhythm...");
+
+        var results = await Promise.all([
+          App.fetchUpcoming(9),
+          App.fetchByDate({
+            startDate: App.formatDateInput(today),
+            endDate: App.formatDateInput(weekEnd),
+            type: "both",
+            limit: 10
+          })
+        ]);
+
+        state.upcomingItems = App.pickItems(results[0]);
+        state.weekItems = App.pickItems(results[1]);
+
+        refreshKpis();
+        buildSpotlight(state.upcomingItems);
+        buildWeekPeek(state.weekItems);
+        renderResults(
+          state.upcomingItems,
+          "Upcoming at a glance",
+          "A live feed of upcoming, non-cancelled events.",
+          "Live"
+        );
+        setStatus("success", "Live discovery feed is ready.");
+      }
+
+      async function runDiscovery(source) {
+        var query = refs.searchQuery.value.trim();
+        var category = refs.searchCategory.value.trim();
+        var limit = Number(refs.searchLimit.value || 9);
+
+        setStatus("info", "Refreshing the discover feed...");
+
+        try {
+          var payload;
+          if (query) {
+            payload = await App.searchEvents(query, limit);
+            renderResults(
+              App.pickItems(payload),
+              "Search results",
+              "Results for \"" + query + "\" across titles, descriptions, and categories.",
+              "Search"
+            );
+            setStatus("success", "Search results are in.");
+            return;
+          }
+
+          if (category) {
+            payload = await App.fetchByCategory(category, limit);
+            renderResults(
+              App.pickItems(payload),
+              category + " picks",
+              "Cards pulled straight from the category route for " + category + ".",
+              "Category"
+            );
+            setStatus("success", "Category lane updated.");
+            return;
+          }
+
+          payload = await App.fetchUpcoming(limit);
+          renderResults(
+            App.pickItems(payload),
+            source === "reset" ? "Upcoming at a glance" : "Upcoming events",
+            "Blank discovery mode uses the upcoming-events route.",
+            "Live"
+          );
+          setStatus("success", "Upcoming feed refreshed.");
+        } catch (error) {
+          setStatus("error", "Could not refresh discovery feed: " + error.message);
+        }
+      }
+
+      refs.discoverForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        Array.from(refs.quickCategoryRow.children).forEach(function (chip) {
+          chip.classList.remove("is-active");
+        });
+        runDiscovery("form");
+      });
+
+      refs.resetDiscoverBtn.addEventListener("click", function () {
+        refs.searchQuery.value = "";
+        refs.searchCategory.value = "";
+        refs.searchLimit.value = "9";
+        Array.from(refs.quickCategoryRow.children).forEach(function (chip) {
+          chip.classList.remove("is-active");
+        });
+        runDiscovery("reset");
+      });
+
+      populateCategoryControls();
+      loadHome().catch(function (error) {
+        setStatus("error", "The home view could not load: " + error.message);
+      });
+    }());
+  </script>
+</body>
+</html>

@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Radford Events API Test Console</title>
+  <link rel="stylesheet" href="RadfordTicketing.css">
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <div class="header-inner">
+        <div class="header-logo" aria-hidden="true">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="24" cy="24" r="22" fill="white" stroke="#b11226" stroke-width="2"></circle>
+            <text x="24" y="30" font-size="20" font-weight="bold" fill="#b11226" text-anchor="middle" font-family="serif">R</text>
+          </svg>
+        </div>
+        <h1 class="header-title">Radford Events API Test Console</h1>
+        <div class="header-actions">
+          <span class="user-status">AWS API Integration Production</span>
+        </div>
+      </div>
+    </header>
+
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="nav-buttons">
+          <button class="nav-btn active" type="button">Create + S3 Flow</button>
+          <button class="nav-btn active" type="button">Read + Search + Date Flows</button>
+          <button class="nav-btn active" type="button">Update + Cancel Flows</button>
+        </div>
+      </div>
+    </nav>
+
+    <main class="main-container">
+      <section class="content-section mountain-section">
+        <h2 class="section-title">API Testing Ground</h2>
+        <p class="api-intro">
+          This page tests the current create, read, search, media, date, update, and cancel flows for your AWS event APIs.
+        </p>
+
+        <div class="api-layout">
+          <div class="ticket-card api-panel">
+            <h3 class="chart-title">Create Event + Upload Flow</h3>
+            <form id="eventForm" class="api-form">
+              <div class="field-grid">
+                <div>
+                  <label class="api-label" for="event_name">Event Name</label>
+                  <input class="input-field" type="text" id="event_name" required>
+                </div>
+                <div>
+                  <label class="api-label" for="date_time">Start Date and Time</label>
+                  <input class="input-field" type="datetime-local" id="date_time" required>
+                </div>
+                <div>
+                  <label class="api-label" for="end_date_time">End Date and Time</label>
+                  <input class="input-field" type="datetime-local" id="end_date_time" required>
+                </div>
+                <div>
+                  <label class="api-label" for="location">Location</label>
+                  <input class="input-field" type="text" id="location" required>
+                </div>
+                <div>
+                  <label class="api-label" for="venue_name">Venue</label>
+                  <select class="input-field" id="venue_name" required></select>
+                </div>
+                <div>
+                  <label class="api-label" for="layout_name">Layout</label>
+                  <select class="input-field" id="layout_name" required></select>
+                </div>
+                <div>
+                  <label class="api-label" for="seat_count">Seat Count</label>
+                  <input class="input-field" type="number" min="1" step="1" id="seat_count" placeholder="100" required>
+                </div>
+                <div>
+                  <label class="api-label" for="budget_price">Budget Price</label>
+                  <input class="input-field" type="number" min="0" step="0.01" id="budget_price" value="10" placeholder="10.00">
+                </div>
+                <div>
+                  <label class="api-label" for="standard_price">Standard Price</label>
+                  <input class="input-field" type="number" min="0" step="0.01" id="standard_price" value="50" placeholder="50.00">
+                </div>
+                <div>
+                  <label class="api-label" for="vip_price">VIP Price</label>
+                  <input class="input-field" type="number" min="0" step="0.01" id="vip_price" value="100" placeholder="100.00">
+                </div>
+                <div class="field-span-full">
+                  <label class="api-label" for="description">Description (optional)</label>
+                  <textarea class="input-field api-textarea" id="description" rows="3" placeholder="Event details"></textarea>
+                </div>
+                <div class="field-span-full">
+                  <label class="api-label">Categories</label>
+                  <div id="categoriesWrapper">
+                    <button type="button" id="addCategoryBtn">Add another category</button>
+                  </div>
+                  <p class="config-help">Select at least one category before running the create flow.</p>
+                </div>
+                <p class="config-help field-span-full">Muse Banquet Hall layouts sync tickets to team03 now. Other venue/layout combinations are still created in our database and marked <code>UNSYNCED</code>.</p>
+                <p class="config-help field-span-full">Start/end datetime values are sent as <code>YYYY-MM-DDThh:mm:ss+/-hh:mm</code> using your browser timezone.</p>
+              </div>
+
+              <div class="upload-grid">
+                <div>
+                  <label class="api-label" for="images">Upload Images</label>
+                  <input class="input-field api-file-input" type="file" id="images" accept="image/*" multiple>
+                  <p class="config-help">First image is sent with <code>kind: "hero"</code>. Remaining images use <code>kind: "gallery"</code>.</p>
+                  <div id="imagePreview" class="preview"></div>
+                </div>
+                <div>
+                  <label class="api-label" for="documents">Upload Documents</label>
+                  <input class="input-field api-file-input" type="file" id="documents" multiple>
+                  <div id="docList" class="file-list"></div>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button class="btn-primary" type="submit" id="runFlowBtn">Run Create Flow</button>
+                <button class="btn-accent" type="button" id="clearOutputsBtn">Clear Outputs</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="ticket-card api-panel">
+            <h3 class="chart-title">Get Event by ID</h3>
+            <form id="getEventByIdForm" class="api-form">
+              <div class="config-row">
+                <div>
+                  <label class="api-label" for="get_event_id">Event ID</label>
+                  <input class="input-field" type="text" id="get_event_id" placeholder="event UUID" required>
+                </div>
+              </div>
+              <div class="form-actions">
+                <button class="btn-primary" type="submit">Get Event</button>
+                <button class="btn-accent" type="button" id="openEventPageBtn">Open Event Page</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="ticket-card api-panel">
+            <h3 class="chart-title">Get Event Categories Only</h3>
+            <form id="getEventCategoriesForm" class="api-form">
+              <div class="config-row">
+                <div>
+                  <label class="api-label" for="get_event_categories_id">Event ID</label>
+                  <input class="input-field" type="text" id="get_event_categories_id" placeholder="event UUID" required>
+                </div>
+              </div>
+              <p class="config-help">Calls <code>GET /production/Group-2/events/{id}/categories</code> and returns only the categories array.</p>
+              <div class="form-actions">
+                <button class="btn-primary" type="submit">Get Categories</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="ticket-card api-panel">
+            <h3 class="chart-title">Get Event Image Metadata</h3>
+            <form id="getImageMetadataForm" class="api-form">
+              <div class="config-row">
+                <div>
+                  <label class="api-label" for="image_metadata_event_id">Event ID</label>
+                  <input class="input-field" type="text" id="image_metadata_event_id" placeholder="event UUID" required>
+                </div>
+              </div>
+              <p class="config-help">Calls <code>GET /production/Group-2/events/{eventId}/images</code> and returns hero image metadata or a signed hero URL.</p>
+              <div class="form-actions">
+                <button class="btn-primary" type="submit">Get Image Metadata</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="ticket-card api-panel">
+            <h3 class="chart-title">Get Events by Category</h3>
+            <form id="getByCategoryForm" class="api-form">
+              <div class="config-row">
+                <div>
+                  <label class="api-label" for="category_query">Category</label>
+                  <input class="input-field" type="text" id="category_query" placeholder="athletics" required>
+                </div>
+                <div>
+                  <label class="api-label" for="category_limit">Limit (optional)</label>
+                  <input class="input-field" type="number" id="category_limit" min="1" max="100" placeholder="25">
+                </div>
+              </div>
+              <div class="form-actions">
+                <button class="btn-primary" type="submit">Get Category Events</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="ticket-card api-panel">
+            <h3 class="chart-title">List Upcoming Events</h3>
+            <form id="listEventsForm" class="api-form">
+              <div class="config-row">
+                <div>
+                  <label class="api-label" for="list_events_limit">Limit (optional)</label>
+                  <input class="input-field" type="number" id="list_events_limit" min="1" max="100" placeholder="50">
+                </div>
+              </div>
+              <p class="config-help">Calls <code>GET /production/Group-2</code> and returns upcoming, non-cancelled events.</p>
+              <div class="form-actions">
+                <button class="btn-primary" type="submit">List Events</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="ticket-card api-panel">
+            <h3 class="chart-title">Get Events by Date</h3>
+            <form id="getByDateForm" class="api-form">
+              <div class="field-grid">
+                <div>
+                  <label class="api-label" for="date_single_day">Single Day (optional)</label>
+                  <input class="input-field" type="date" id="date_single_day">
+                </div>
+                <div>
+                  <label class="api-label" for="date_start">Start Date</label>
+                  <input class="input-field" type="date" id="date_start">
+                </div>
+                <div>
+                  <label class="api-label" for="date_end">End Date</label>
+                  <input class="input-field" type="date" id="date_end">
+                </div>
+                <div>
+                  <label class="api-label" for="date_type">Type</label>
+                  <select class="input-field" id="date_type">
+                    <option value="both">both</option>
+                    <option value="start">start</option>
+                    <option value="end">end</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="api-label" for="date_limit">Limit (optional)</label>
+                  <input class="input-field" type="number" id="date_limit" min="1" max="100" placeholder="25">
+                </div>
+                <div>
+                  <label class="api-label" for="date_next_token">Next Token (optional)</label>
+                  <input class="input-field" type="text" id="date_next_token" placeholder="paste nextToken from a prior response">
+                </div>
+              </div>
+              <p class="config-help">Provide <code>date</code> for a single-day lookup, or use <code>startDate</code> and <code>endDate</code> for a range.</p>
+              <div class="form-actions">
+                <button class="btn-primary" type="submit">Run Date Search</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="ticket-card api-panel">
+            <h3 class="chart-title">Search Events</h3>
+            <p class="config-help">Open the dedicated search page to browse matching event cards or list upcoming events when the query is blank.</p>
+            <div class="form-actions">
+              <button class="btn-primary" type="button" id="openSearchPageBtn">Open Search Page</button>
+            </div>
+          </div>
+
+          <div class="ticket-card api-panel">
+            <h3 class="chart-title">Update Event</h3>
+            <form id="updateEventForm" class="api-form">
+              <div class="field-grid">
+                <div>
+                  <label class="api-label" for="update_event_id">Event ID</label>
+                  <input class="input-field" type="text" id="update_event_id" placeholder="event UUID" required>
+                </div>
+                <div class="field-span-full">
+                  <label class="api-label" for="update_body_json">Update Body (JSON)</label>
+                  <textarea class="input-field api-textarea code-textarea" id="update_body_json" rows="8"></textarea>
+                </div>
+              </div>
+              <p class="config-help">Send only fields you want to update. Use full datetime format if updating <code>end_date_time</code>.</p>
+              <div class="form-actions">
+                <button class="btn-primary" type="submit">Run Update</button>
+                <button class="btn-small" type="button" id="loadUpdateSampleBtn">Load Sample</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="ticket-card api-panel">
+            <h3 class="chart-title">Cancel Event</h3>
+            <form id="cancelEventForm" class="api-form">
+              <div class="config-row">
+                <div>
+                  <label class="api-label" for="cancel_event_id">Event ID</label>
+                  <input class="input-field" type="text" id="cancel_event_id" placeholder="event UUID" required>
+                </div>
+              </div>
+              <p class="config-help">Calls <code>PATCH /production/Group-2/events/{id}</code> with <code>{"status":"CANCELLED"}</code>. Use carefully against live data.</p>
+              <div class="form-actions">
+                <button class="btn-primary" type="submit">Cancel Event</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="ticket-card api-panel">
+            <h3 class="chart-title">Request Preview</h3>
+            <pre id="payloadPreview" class="response-pre"></pre>
+          </div>
+
+          <div class="ticket-card api-panel">
+            <h3 class="chart-title">Execution Log</h3>
+            <pre id="logOutput" class="response-pre"></pre>
+          </div>
+
+          <div class="ticket-card api-panel">
+            <h3 class="chart-title">API Response</h3>
+            <div id="responseMeta" class="response-meta info">No request has been sent yet.</div>
+            <pre id="responseOutput" class="response-pre"></pre>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p class="footer-text">2026 Radford University</p>
+      <p class="footer-subtext">CS472 API Validation Workspace</p>
+    </footer>
+  </div>
+
+  <!-- autoruns on page load -->
+  <script>
+    var CATEGORIES_LIST = ["Sports",
+              "Baseball",
+              "Basketball",
+              "Cross Country",
+              "Golf",
+              "Soccer",
+              "Track and Field",
+              "Lacrosse",
+              "Softball",
+              "Volleyball",
+              "Music",
+              "Conference",
+              "Speech",
+              "Performance",
+              "Honors",
+              "Academic"]
+
+      function createCategorySelect() {
+        var select = document.createElement("select");
+        select.className = "input-field";
+        select.appendChild(new Option("Please select a category", ""));
+
+        for (var i = 0; i < CATEGORIES_LIST.length; i += 1) {
+          select.appendChild(new Option(CATEGORIES_LIST[i], CATEGORIES_LIST[i]));
+        }
+
+        return select;
+      }
+
+      function addCatDropdown() {
+        var wrapper = document.getElementById("categoriesWrapper");
+        var button = document.getElementById("addCategoryBtn");
+        var select = createCategorySelect();
+        wrapper.insertBefore(select, button);
+        return select;
+      }
+  </script>
+
+  <script>
+    
+    // Keep API_BASE at the stage/group root (do not include /Create-Event here).
+    var API_BASE = "https://service.example.invalid/production/Group-2";
+    var LIST_EVENTS_PATH = "";
+    var CREATE_EVENT_PATH = "/Create-Event";
+    var IMAGE_PRESIGN_PATH = "/events/{eventId}/images/presign";
+    var DOC_PRESIGN_PATH = "/events/{eventId}/documents/presign";
+    var GET_EVENT_BY_ID_PATH = "{id}";
+    var GET_EVENT_CATEGORIES_PATH = "/events/{id}/categories";
+    var GET_EVENTS_BY_CATEGORY_PATH = "{id}/categories";
+    var GET_EVENTS_BY_DATE_PATH = "/Date";
+    var GET_EVENT_IMAGE_METADATA_PATH = "/events/{eventId}/images";
+    var UPDATE_EVENT_PATH = "/Update-Event/{id}";
+    var UPDATE_EVENT_METHOD = "PUT";
+    var CANCEL_EVENT_PATH = "/events/{id}";
+    var CANCEL_EVENT_METHOD = "PATCH";
+    var DEFAULT_TIER_PRICES = {
+      budget_price: 10,
+      standard_price: 50,
+      vip_price: 100
+    };
+    var VENUE_LAYOUTS = [
+      {
+        venueName: "Preston Hall",
+        layouts: [
+          { layoutName: "All Section", capacity: 1500 },
+          { layoutName: "Middle Section", capacity: 1000 }
+        ]
+      },
+      {
+        venueName: "Bonnie Auditorium",
+        layouts: [
+          { layoutName: "All Section", capacity: 150 }
+        ]
+      },
+      {
+        venueName: "Muse Banquet Hall",
+        layouts: [
+          { layoutName: "Banquet", capacity: 150 },
+          { layoutName: "Classroom", capacity: 175 },
+          { layoutName: "Theater", capacity: 200 }
+        ]
+      },
+      {
+        venueName: "Dedmon Center",
+        layouts: [
+          { layoutName: "All Section", capacity: 3200 },
+          { layoutName: "Graduation Style", capacity: 2500 }
+        ]
+      }
+    ];
+    
+    var refs = {
+      eventForm: document.getElementById("eventForm"),
+      listEventsForm: document.getElementById("listEventsForm"),
+      getEventByIdForm: document.getElementById("getEventByIdForm"),
+      getEventCategoriesForm: document.getElementById("getEventCategoriesForm"),
+      getByCategoryForm: document.getElementById("getByCategoryForm"),
+      getByDateForm: document.getElementById("getByDateForm"),
+      getImageMetadataForm: document.getElementById("getImageMetadataForm"),
+      updateEventForm: document.getElementById("updateEventForm"),
+      cancelEventForm: document.getElementById("cancelEventForm"),
+      clearOutputsBtn: document.getElementById("clearOutputsBtn"),
+      loadUpdateSampleBtn: document.getElementById("loadUpdateSampleBtn"),
+      openEventPageBtn: document.getElementById("openEventPageBtn"),
+      openSearchPageBtn: document.getElementById("openSearchPageBtn"),
+      eventName: document.getElementById("event_name"),
+      dateTime: document.getElementById("date_time"),
+      endDateTime: document.getElementById("end_date_time"),
+      location: document.getElementById("location"),
+      venueName: document.getElementById("venue_name"),
+      layoutName: document.getElementById("layout_name"),
+      description: document.getElementById("description"),
+      seatCount: document.getElementById("seat_count"),
+      budgetPrice: document.getElementById("budget_price"),
+      standardPrice: document.getElementById("standard_price"),
+      vipPrice: document.getElementById("vip_price"),
+      categories: document.getElementById("categoriesWrapper"),
+      addCategoryBtn: document.getElementById("addCategoryBtn"),
+      listEventsLimit: document.getElementById("list_events_limit"),
+      getEventId: document.getElementById("get_event_id"),
+      getEventCategoriesId: document.getElementById("get_event_categories_id"),
+      categoryQuery: document.getElementById("category_query"),
+      categoryLimit: document.getElementById("category_limit"),
+      dateSingleDay: document.getElementById("date_single_day"),
+      dateStart: document.getElementById("date_start"),
+      dateEnd: document.getElementById("date_end"),
+      dateType: document.getElementById("date_type"),
+      dateLimit: document.getElementById("date_limit"),
+      dateNextToken: document.getElementById("date_next_token"),
+      imageMetadataEventId: document.getElementById("image_metadata_event_id"),
+      updateEventId: document.getElementById("update_event_id"),
+      updateBodyJson: document.getElementById("update_body_json"),
+      cancelEventId: document.getElementById("cancel_event_id"),
+      images: document.getElementById("images"),
+      documents: document.getElementById("documents"),
+      imagePreview: document.getElementById("imagePreview"),
+      docList: document.getElementById("docList"),
+      payloadPreview: document.getElementById("payloadPreview"),
+      logOutput: document.getElementById("logOutput"),
+      responseMeta: document.getElementById("responseMeta"),
+      responseOutput: document.getElementById("responseOutput")
+    };
+
+    
+    function safeJsonParse(text) {
+      try {
+        return JSON.parse(text);
+      } catch (error) {
+        return text;
+      }
+    }
+
+    function serialize(value) {
+      if (typeof value === "string") {
+        return value;
+      }
+      return JSON.stringify(value, null, 2);
+    }
+
+    function normalizeBaseUrl(url) {
+      return String(url || "").trim().replace(/\/+$/, "");
+    }
+
+    function buildUrl(path, eventId) {
+      var replacedPath = String(path || "")
+        .trim()
+        .replace(/\{eventId\}|\{id\}/g, encodeURIComponent(eventId || ""));
+
+      if (/^https?:\/\//i.test(replacedPath)) {
+        return replacedPath;
+      }
+
+      var cleanBase = normalizeBaseUrl(API_BASE);
+      var cleanPath = replacedPath.replace(/^\/+/, "");
+      if (!cleanPath) {
+        return cleanBase;
+      }
+      return cleanBase + "/" + cleanPath;
+    }
+
+    function hasIdPlaceholder(path) {
+      return /\{eventId\}|\{id\}/.test(String(path || ""));
+    }
+
+    function extensionFromFilename(name) {
+      var index = name.lastIndexOf(".");
+      return index >= 0 ? name.slice(index + 1).toLowerCase() : "";
+    }
+
+    function encodePathSegments(path) {
+      return String(path || "")
+        .split("/")
+        .map(function (segment) { return encodeURIComponent(segment); })
+        .join("/");
+    }
+
+    function fallbackEventId() {
+      return "evt-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10);
+    }
+
+    function generateEventId() {
+      if (window.crypto && typeof window.crypto.randomUUID === "function") {
+        return window.crypto.randomUUID();
+      }
+      return fallbackEventId();
+    }
+
+    function setResponseMeta(status, message) {
+      refs.responseMeta.className = "response-meta " + status;
+      refs.responseMeta.textContent = message;
+    }
+
+    function appendLog(message, data) {
+      var timestamp = new Date().toLocaleTimeString();
+      var entry = "[" + timestamp + "] " + message;
+      if (typeof data !== "undefined") {
+        entry += "\n" + serialize(data);
+      }
+
+      refs.logOutput.textContent += refs.logOutput.textContent ? "\n\n" + entry : entry;
+      refs.logOutput.scrollTop = refs.logOutput.scrollHeight;
+    }
+
+    function setRequestPreview(payload) {
+      refs.payloadPreview.textContent = serialize(payload);
+    }
+
+    function clearOutputs() {
+      refs.logOutput.textContent = "";
+      refs.responseOutput.textContent = "";
+      setResponseMeta("info", "Outputs cleared. Ready for next request.");
+    }
+
+    function defaultUpdateBody() {
+      return {
+        budget_price: 15,
+        standard_price: 35,
+        vip_price: 60,
+        description: "Updated using API test console"
+      };
+    }
+
+    function parseJsonObject(raw) {
+      var parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+        throw new Error("Update body must be a JSON object.");
+      }
+      return parsed;
+    }
+
+    function parseOptionalInt(rawValue, min, max, label) {
+      if (!rawValue) {
+        return "";
+      }
+
+      var parsed = Number.parseInt(rawValue, 10);
+      if (!Number.isInteger(parsed) || parsed < min || parsed > max) {
+        throw new Error(label + " must be between " + min + " and " + max + ".");
+      }
+
+      return String(parsed);
+    }
+
+    function isIsoDateOnly(value) {
+      return /^\d{4}-\d{2}-\d{2}$/.test(String(value || "").trim());
+    }
+
+    function appendQueryParams(url, params) {
+      var serialized = new URLSearchParams(params).toString();
+      if (!serialized) {
+        return url;
+      }
+      return url + (url.indexOf("?") === -1 ? "?" : "&") + serialized;
+    }
+
+    async function handleApiResponse(response, successMessage, failureMessage, logPrefix) {
+      var responseText = await response.text();
+      var responseData = safeJsonParse(responseText);
+      refs.responseOutput.textContent = serialize(responseData);
+      appendLog(logPrefix + " response " + response.status, responseData);
+
+      if (response.ok) {
+        setResponseMeta("success", successMessage + " (" + response.status + ")");
+      } else {
+        setResponseMeta("error", failureMessage + " (" + response.status + ")");
+      }
+
+      return responseData;
+    }
+
+    function parseSeatCount(rawValue) {
+      if (!rawValue) {
+        return null;
+      }
+      var parsed = Number.parseInt(rawValue, 10);
+      return Number.isInteger(parsed) ? parsed : null;
+    }
+
+    function parsePrice(rawValue) {
+      if (!rawValue) {
+        return null;
+      }
+      var parsed = Number(rawValue);
+      return Number.isFinite(parsed) ? parsed : null;
+    }
+
+    function getTierNumber(rawValue, fallbackValue) {
+      var parsed = parsePrice(rawValue);
+      return parsed === null ? fallbackValue : parsed;
+    }
+
+    function collectTierPrices() {
+      return {
+        budget_price: getTierNumber(refs.budgetPrice.value.trim(), DEFAULT_TIER_PRICES.budget_price),
+        standard_price: getTierNumber(refs.standardPrice.value.trim(), DEFAULT_TIER_PRICES.standard_price),
+        vip_price: getTierNumber(refs.vipPrice.value.trim(), DEFAULT_TIER_PRICES.vip_price)
+      };
+    }
+
+    function getSelectedCategories() {
+      return Array.from(refs.categories.querySelectorAll("select"))
+        .map(function (select) {
+          return select.value.trim();
+        })
+        .filter(function (value) {
+          return value.length > 0;
+        });
+    }
+
+    function getVenueConfig(venueName) {
+      return VENUE_LAYOUTS.find(function (venue) {
+        return venue.venueName === venueName;
+      }) || null;
+    }
+
+    function getSelectedLayoutConfig() {
+      var venueConfig = getVenueConfig(refs.venueName.value);
+      if (!venueConfig) {
+        return null;
+      }
+      return venueConfig.layouts.find(function (layout) {
+        return layout.layoutName === refs.layoutName.value;
+      }) || null;
+    }
+
+    function populateVenueOptions() {
+      refs.venueName.innerHTML = "";
+      VENUE_LAYOUTS.forEach(function (venue) {
+        refs.venueName.appendChild(new Option(venue.venueName, venue.venueName));
+      });
+    }
+
+    function syncSeatCountFromLayout(force) {
+      var layoutConfig = getSelectedLayoutConfig();
+      if (!layoutConfig) {
+        return;
+      }
+
+      if (force || !refs.seatCount.value.trim() || refs.seatCount.dataset.autoFilled === "true") {
+        refs.seatCount.value = String(layoutConfig.capacity);
+        refs.seatCount.dataset.autoFilled = "true";
+      }
+    }
+
+    function populateLayoutOptions(forceSeatCount) {
+      refs.layoutName.innerHTML = "";
+
+      var venueConfig = getVenueConfig(refs.venueName.value);
+      if (!venueConfig) {
+        return;
+      }
+
+      venueConfig.layouts.forEach(function (layout) {
+        refs.layoutName.appendChild(new Option(layout.layoutName, layout.layoutName));
+      });
+
+      syncSeatCountFromLayout(forceSeatCount !== false);
+    }
+
+    function pad2(value) {
+      return String(value).padStart(2, "0");
+    }
+
+    function toApiDateTime(localValue) {
+      if (!localValue) {
+        return "";
+      }
+
+      var date = new Date(localValue);
+      if (Number.isNaN(date.getTime())) {
+        return "";
+      }
+
+      var year = date.getFullYear();
+      var month = pad2(date.getMonth() + 1);
+      var day = pad2(date.getDate());
+      var hour = pad2(date.getHours());
+      var minute = pad2(date.getMinutes());
+      var second = pad2(date.getSeconds());
+
+      var offsetMinutes = -date.getTimezoneOffset();
+      var sign = offsetMinutes >= 0 ? "+" : "-";
+      var absOffset = Math.abs(offsetMinutes);
+      var offsetHour = pad2(Math.floor(absOffset / 60));
+      var offsetMinute = pad2(absOffset % 60);
+
+      return year + "-" + month + "-" + day + "T" + hour + ":" + minute + ":" + second + sign + offsetHour + ":" + offsetMinute;
+    }
+
+    function validateCreatePayload(payload) {
+      if (!payload.event_name) {
+        return "event_name is required.";
+      }
+      if (!payload.date_time) {
+        return "date_time is required.";
+      }
+      if (!payload.end_date_time) {
+        return "end_date_time is required.";
+      }
+      if (!payload.location) {
+        return "location is required.";
+      }
+      if (!payload.venue_name) {
+        return "venue_name is required.";
+      }
+      if (!payload.layout_name) {
+        return "layout_name is required.";
+      }
+      if (!Array.isArray(payload.categories) || payload.categories.length === 0) {
+        return "At least one category is required.";
+      }
+      if (!Number.isInteger(payload.seat_count) || payload.seat_count <= 0) {
+        return "seat_count must be a positive integer.";
+      }
+      if (payload.end_date_time <= payload.date_time) {
+        return "end_date_time must be after date_time.";
+      }
+      if (payload.budget_price < 0 || payload.standard_price < 0 || payload.vip_price < 0) {
+        return "tier prices cannot be negative.";
+      }
+      if (!(payload.budget_price < payload.standard_price && payload.standard_price < payload.vip_price)) {
+        return "budget_price must be less than standard_price, and standard_price must be less than vip_price.";
+      }
+      return null;
+    }
+
+    function collectPayload(eventId, imageKeys, documentKeys) {
+      var tierPrices = collectTierPrices();
+      var payload = {
+        event_id: eventId || "(generated on submit)",
+        event_name: refs.eventName.value.trim(),
+        date_time: toApiDateTime(refs.dateTime.value),
+        end_date_time: toApiDateTime(refs.endDateTime.value),
+        location: refs.location.value.trim(),
+        venue_name: refs.venueName.value.trim(),
+        layout_name: refs.layoutName.value.trim(),
+        seat_count: parseSeatCount(refs.seatCount.value.trim()),
+        budget_price: tierPrices.budget_price,
+        standard_price: tierPrices.standard_price,
+        vip_price: tierPrices.vip_price,
+        images: imageKeys || Array.from(refs.images.files || []).map(function (file) { return file.name; }),
+        documents: documentKeys || Array.from(refs.documents.files || []).map(function (file) { return file.name; })
+      };
+
+      var description = refs.description.value.trim();
+      if (description) {
+        payload.description = description;
+      }
+
+      payload.categories = getSelectedCategories();
+
+      setRequestPreview(payload);
+      return payload;
+    }
+
+    function renderImagePreview() {
+      refs.imagePreview.innerHTML = "";
+      Array.from(refs.images.files || []).forEach(function (file) {
+        var reader = new FileReader();
+        reader.onload = function (event) {
+          var img = document.createElement("img");
+          img.src = event.target.result;
+          img.alt = file.name;
+          refs.imagePreview.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function renderDocumentList() {
+      refs.docList.innerHTML = "";
+      var files = Array.from(refs.documents.files || []);
+      if (files.length === 0) {
+        refs.docList.textContent = "No documents selected.";
+        return;
+      }
+      files.forEach(function (file) {
+        var row = document.createElement("div");
+        row.textContent = file.name;
+        refs.docList.appendChild(row);
+      });
+    }
+
+    function resolveUploadKey(presign, fallbackName, kind) {
+      var key = presign.key || (presign.fields && presign.fields.key) || fallbackName;
+      var explicitUrl = presign.publicUrl || presign.fileUrl || presign.objectUrl;
+      if (explicitUrl && kind !== "document") {
+        return explicitUrl;
+      }
+
+      var uploadUrl = presign.uploadUrl || presign.url || "";
+      if (!/^https?:\/\//i.test(uploadUrl) || kind === "document") {
+        return key;
+      }
+
+      var cleanUploadUrl = uploadUrl.split("?")[0].split("#")[0];
+
+      // POST-style presign usually gives bucket root URL + fields.key.
+      if (presign.fields && presign.url && key) {
+        return cleanUploadUrl.replace(/\/+$/, "") + "/" + encodePathSegments(key);
+      }
+
+      // PUT-style presign often includes full object path in the URL.
+      if (key && cleanUploadUrl.indexOf(key) !== -1) {
+        return cleanUploadUrl;
+      }
+
+      return key;
+    }
+
+    async function uploadViaPut(file, presign) {
+      var uploadUrl = presign.uploadUrl || presign.url;
+      var response = await fetch(uploadUrl, {
+        method: "PUT",
+        headers: { "Content-Type": file.type || "application/octet-stream" },
+        body: file
+      });
+
+      if (!response.ok) {
+        throw new Error("Upload failed (" + response.status + ")");
+      }
+    }
+
+    async function uploadViaPost(file, presign) {
+      var formData = new FormData();
+      Object.entries(presign.fields || {}).forEach(function (entry) {
+        formData.append(entry[0], entry[1]);
+      });
+      formData.append("file", file);
+
+      var response = await fetch(presign.url, {
+        method: "POST",
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error("Upload failed (" + response.status + ")");
+      }
+    }
+
+    async function requestPresign(kind, eventId, file, imageKind) {
+      var presignPath = kind === "image" ? IMAGE_PRESIGN_PATH : DOC_PRESIGN_PATH;
+      var url = buildUrl(presignPath, eventId);
+
+      var body = {
+        eventId: eventId,
+        ext: extensionFromFilename(file.name) || (kind === "image" ? "jpg" : "pdf"),
+        contentType: file.type || "application/octet-stream"
+      };
+
+      if (kind === "image") {
+        body.kind = imageKind;
+      }
+
+      appendLog("POST " + url, body);
+
+      var response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+
+      var text = await response.text();
+      var data = safeJsonParse(text);
+      appendLog("Presign response " + response.status, data);
+
+      if (!response.ok) {
+        throw new Error("Presign request failed (" + response.status + ")");
+      }
+      if (typeof data !== "object" || data === null) {
+        throw new Error("Presign response was not a JSON object.");
+      }
+
+      return data;
+    }
+
+    async function runListEvents(event) {
+      event.preventDefault();
+      clearOutputs();
+      setResponseMeta("info", "Listing upcoming events...");
+
+      var limit;
+      try {
+        limit = parseOptionalInt(refs.listEventsLimit.value.trim(), 1, 100, "limit");
+      } catch (error) {
+        setResponseMeta("error", "Validation failed: " + error.message);
+        appendLog("Validation failed", error.message);
+        return;
+      }
+
+      var url = buildUrl(LIST_EVENTS_PATH);
+      if (limit) {
+        url = appendQueryParams(url, { limit: limit });
+      }
+
+      setRequestPreview({ method: "GET", url: url });
+      appendLog("GET " + url);
+
+      try {
+        var response = await fetch(url, { method: "GET" });
+        await handleApiResponse(
+          response,
+          "List events succeeded",
+          "List events failed",
+          "List events"
+        );
+      } catch (error) {
+        setResponseMeta("error", "Flow failed: " + error.message);
+        appendLog("Flow failed", error.message);
+      }
+    }
+
+    async function runGetEventById(event) {
+      event.preventDefault();
+      clearOutputs();
+      setResponseMeta("info", "Fetching event by id...");
+
+      var eventId = refs.getEventId.value.trim();
+      if (!eventId) {
+        setResponseMeta("error", "Validation failed: event id is required.");
+        appendLog("Validation failed", "event id is required.");
+        return;
+      }
+
+      var url = buildUrl(GET_EVENT_BY_ID_PATH, eventId);
+      setRequestPreview({ method: "GET", url: url });
+      appendLog("GET " + url);
+
+      try {
+        var response = await fetch(url, { method: "GET" });
+        await handleApiResponse(
+          response,
+          "Get by ID succeeded",
+          "Get by ID failed",
+          "Get by ID"
+        );
+      } catch (error) {
+        setResponseMeta("error", "Flow failed: " + error.message);
+        appendLog("Flow failed", error.message);
+      }
+    }
+
+    async function runGetEventCategories(event) {
+      event.preventDefault();
+      clearOutputs();
+      setResponseMeta("info", "Fetching event categories...");
+
+      var eventId = refs.getEventCategoriesId.value.trim();
+      if (!eventId) {
+        setResponseMeta("error", "Validation failed: event id is required.");
+        appendLog("Validation failed", "event id is required.");
+        return;
+      }
+
+      var url = buildUrl(GET_EVENT_CATEGORIES_PATH, eventId);
+      setRequestPreview({ method: "GET", url: url });
+      appendLog("GET " + url);
+
+      try {
+        var response = await fetch(url, { method: "GET" });
+        await handleApiResponse(
+          response,
+          "Get categories succeeded",
+          "Get categories failed",
+          "Get categories"
+        );
+      } catch (error) {
+        setResponseMeta("error", "Flow failed: " + error.message);
+        appendLog("Flow failed", error.message);
+      }
+    }
+
+    async function runGetByCategory(event) {
+      event.preventDefault();
+      clearOutputs();
+      setResponseMeta("info", "Fetching events by category...");
+
+      var category = refs.categoryQuery.value.trim();
+      if (!category) {
+        setResponseMeta("error", "Validation failed: category is required.");
+        appendLog("Validation failed", "category is required.");
+        return;
+      }
+
+      var limitRaw = refs.categoryLimit.value.trim();
+      var params = { category: category };
+      if (limitRaw) {
+        var limit = Number.parseInt(limitRaw, 10);
+        if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
+          setResponseMeta("error", "Validation failed: limit must be between 1 and 100.");
+          appendLog("Validation failed", "limit must be between 1 and 100.");
+          return;
+        }
+        params.limit = String(limit);
+      }
+
+      var categoryRouteId = hasIdPlaceholder(GET_EVENTS_BY_CATEGORY_PATH) ? category : "";
+      var baseUrl = buildUrl(GET_EVENTS_BY_CATEGORY_PATH, categoryRouteId);
+      var url = appendQueryParams(baseUrl, params);
+      setRequestPreview({ method: "GET", url: url });
+      appendLog("GET " + url);
+
+      try {
+        var response = await fetch(url, { method: "GET" });
+        await handleApiResponse(
+          response,
+          "Get by category succeeded",
+          "Get by category failed",
+          "Get by category"
+        );
+      } catch (error) {
+        setResponseMeta("error", "Flow failed: " + error.message);
+        appendLog("Flow failed", error.message);
+      }
+    }
+
+    async function runGetByDate(event) {
+      event.preventDefault();
+      clearOutputs();
+      setResponseMeta("info", "Fetching events by date...");
+
+      var singleDay = refs.dateSingleDay.value.trim();
+      var startDate = refs.dateStart.value.trim();
+      var endDate = refs.dateEnd.value.trim();
+      var type = refs.dateType.value.trim() || "both";
+      var nextToken = refs.dateNextToken.value.trim();
+      var limit;
+
+      try {
+        limit = parseOptionalInt(refs.dateLimit.value.trim(), 1, 100, "limit");
+      } catch (error) {
+        setResponseMeta("error", "Validation failed: " + error.message);
+        appendLog("Validation failed", error.message);
+        return;
+      }
+
+      if (singleDay) {
+        if (!isIsoDateOnly(singleDay)) {
+          setResponseMeta("error", "Validation failed: single-day date must use YYYY-MM-DD.");
+          appendLog("Validation failed", "single-day date must use YYYY-MM-DD.");
+          return;
+        }
+      } else {
+        if (!startDate || !endDate) {
+          setResponseMeta("error", "Validation failed: provide a single day, or both start and end dates.");
+          appendLog("Validation failed", "provide a single day, or both start and end dates.");
+          return;
+        }
+        if (!isIsoDateOnly(startDate) || !isIsoDateOnly(endDate)) {
+          setResponseMeta("error", "Validation failed: start and end dates must use YYYY-MM-DD.");
+          appendLog("Validation failed", "start and end dates must use YYYY-MM-DD.");
+          return;
+        }
+      }
+
+      var params = { type: type };
+      if (singleDay) {
+        params.date = singleDay;
+      } else {
+        params.startDate = startDate;
+        params.endDate = endDate;
+      }
+      if (limit) {
+        params.limit = limit;
+      }
+      if (nextToken) {
+        params.nextToken = nextToken;
+      }
+
+      var url = appendQueryParams(buildUrl(GET_EVENTS_BY_DATE_PATH), params);
+      setRequestPreview({ method: "GET", url: url });
+      appendLog("GET " + url);
+
+      try {
+        var response = await fetch(url, { method: "GET" });
+        await handleApiResponse(
+          response,
+          "Date search succeeded",
+          "Date search failed",
+          "Date search"
+        );
+      } catch (error) {
+        setResponseMeta("error", "Flow failed: " + error.message);
+        appendLog("Flow failed", error.message);
+      }
+    }
+
+    async function runGetImageMetadata(event) {
+      event.preventDefault();
+      clearOutputs();
+      setResponseMeta("info", "Fetching image metadata...");
+
+      var eventId = refs.imageMetadataEventId.value.trim();
+      if (!eventId) {
+        setResponseMeta("error", "Validation failed: event id is required.");
+        appendLog("Validation failed", "event id is required.");
+        return;
+      }
+
+      var url = buildUrl(GET_EVENT_IMAGE_METADATA_PATH, eventId);
+      setRequestPreview({ method: "GET", url: url });
+      appendLog("GET " + url);
+
+      try {
+        var response = await fetch(url, { method: "GET" });
+        await handleApiResponse(
+          response,
+          "Image metadata request succeeded",
+          "Image metadata request failed",
+          "Image metadata"
+        );
+      } catch (error) {
+        setResponseMeta("error", "Flow failed: " + error.message);
+        appendLog("Flow failed", error.message);
+      }
+    }
+
+    async function runUpdateEvent(event) {
+      event.preventDefault();
+      clearOutputs();
+      setResponseMeta("info", "Running update-event flow...");
+
+      var eventId = refs.updateEventId.value.trim();
+      if (!eventId) {
+        setResponseMeta("error", "Validation failed: event id is required.");
+        appendLog("Validation failed", "event id is required.");
+        return;
+      }
+
+      var updateBodyRaw = refs.updateBodyJson.value.trim();
+      if (!updateBodyRaw) {
+        setResponseMeta("error", "Validation failed: update body is required.");
+        appendLog("Validation failed", "update body is required.");
+        return;
+      }
+
+      var updateBody;
+      try {
+        updateBody = parseJsonObject(updateBodyRaw);
+      } catch (error) {
+        setResponseMeta("error", "Validation failed: " + error.message);
+        appendLog("Validation failed", error.message);
+        return;
+      }
+
+      if (Object.keys(updateBody).length === 0) {
+        setResponseMeta("error", "Validation failed: update body cannot be empty.");
+        appendLog("Validation failed", "update body cannot be empty.");
+        return;
+      }
+
+      var url = buildUrl(UPDATE_EVENT_PATH, eventId);
+      if (!hasIdPlaceholder(UPDATE_EVENT_PATH)) {
+        url = appendQueryParams(url, { id: eventId });
+      }
+      setRequestPreview({ method: UPDATE_EVENT_METHOD, url: url, body: updateBody });
+      appendLog(UPDATE_EVENT_METHOD + " " + url, updateBody);
+
+      try {
+        var response = await fetch(url, {
+          method: UPDATE_EVENT_METHOD,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updateBody)
+        });
+
+        await handleApiResponse(
+          response,
+          "Update succeeded",
+          "Update failed",
+          "Update"
+        );
+      } catch (error) {
+        setResponseMeta("error", "Flow failed: " + error.message);
+        appendLog("Flow failed", error.message);
+      }
+    }
+
+    async function runCancelEvent(event) {
+      event.preventDefault();
+      clearOutputs();
+      setResponseMeta("info", "Cancelling event...");
+
+      var eventId = refs.cancelEventId.value.trim();
+      if (!eventId) {
+        setResponseMeta("error", "Validation failed: event id is required.");
+        appendLog("Validation failed", "event id is required.");
+        return;
+      }
+
+      var cancelBody = { status: "CANCELLED" };
+      var url = buildUrl(CANCEL_EVENT_PATH, eventId);
+      setRequestPreview({ method: CANCEL_EVENT_METHOD, url: url, body: cancelBody });
+      appendLog(CANCEL_EVENT_METHOD + " " + url, cancelBody);
+
+      try {
+        var response = await fetch(url, {
+          method: CANCEL_EVENT_METHOD,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(cancelBody)
+        });
+
+        await handleApiResponse(
+          response,
+          "Cancel event succeeded",
+          "Cancel event failed",
+          "Cancel event"
+        );
+      } catch (error) {
+        setResponseMeta("error", "Flow failed: " + error.message);
+        appendLog("Flow failed", error.message);
+      }
+    }
+
+    async function runCreateFlow(event) {
+      event.preventDefault();
+      clearOutputs();
+      setResponseMeta("info", "Running create-event flow...");
+
+      var eventId = generateEventId();
+      var imageFiles = Array.from(refs.images.files || []);
+      var documentFiles = Array.from(refs.documents.files || []);
+
+      var previewPayload = collectPayload(eventId);
+      var validationError = validateCreatePayload(previewPayload);
+      if (validationError) {
+        setResponseMeta("error", "Validation failed: " + validationError);
+        appendLog("Validation failed", validationError);
+        return;
+      }
+
+      appendLog("Generated event id: " + eventId);
+      appendLog("Files selected: " + imageFiles.length + " image(s), " + documentFiles.length + " document(s)");
+
+      try {
+        var imageKeys = [];
+        for (var i = 0; i < imageFiles.length; i += 1) {
+          var imageFile = imageFiles[i];
+          var imageKind = i === 0 ? "hero" : "gallery";
+
+          appendLog("Requesting " + imageKind + " image presign for " + imageFile.name);
+          var imagePresign = await requestPresign("image", eventId, imageFile, imageKind);
+
+          if (imagePresign.fields && imagePresign.url) {
+            appendLog("Uploading image via POST: " + imageFile.name);
+            await uploadViaPost(imageFile, imagePresign);
+          } else if (imagePresign.url || imagePresign.uploadUrl) {
+            appendLog("Uploading image via PUT: " + imageFile.name);
+            await uploadViaPut(imageFile, imagePresign);
+          } else {
+            throw new Error("Unsupported presign shape for image upload.");
+          }
+
+          imageKeys.push(resolveUploadKey(imagePresign, imageFile.name, "image"));
+          appendLog("Image upload complete: " + imageFile.name);
+        }
+
+        var documentKeys = [];
+        for (var j = 0; j < documentFiles.length; j += 1) {
+          var docFile = documentFiles[j];
+
+          appendLog("Requesting document presign for " + docFile.name);
+          var docPresign = await requestPresign("document", eventId, docFile);
+
+          if (docPresign.fields && docPresign.url) {
+            appendLog("Uploading document via POST: " + docFile.name);
+            await uploadViaPost(docFile, docPresign);
+          } else if (docPresign.url || docPresign.uploadUrl) {
+            appendLog("Uploading document via PUT: " + docFile.name);
+            await uploadViaPut(docFile, docPresign);
+          } else {
+            throw new Error("Unsupported presign shape for document upload.");
+          }
+
+          documentKeys.push(resolveUploadKey(docPresign, docFile.name, "document"));
+          appendLog("Document upload complete: " + docFile.name);
+        }
+
+        var payload = collectPayload(eventId, imageKeys, documentKeys);
+        var createUrl = buildUrl(CREATE_EVENT_PATH, eventId);
+
+        setRequestPreview({ method: "POST", url: createUrl, body: payload });
+        appendLog("POST " + createUrl, payload);
+        var createResponse = await fetch(createUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        await handleApiResponse(
+          createResponse,
+          "Create flow succeeded",
+          "Create endpoint failed",
+          "Create"
+        );
+      } catch (error) {
+        setResponseMeta("error", "Flow failed: " + error.message);
+        appendLog("Flow failed", error.message);
+      }
+    }
+
+    var previewInputs = [
+      refs.eventName,
+      refs.dateTime,
+      refs.endDateTime,
+      refs.location,
+      refs.venueName,
+      refs.layoutName,
+      refs.description,
+      refs.seatCount,
+      refs.budgetPrice,
+      refs.standardPrice,
+      refs.vipPrice,
+      refs.categories
+    ];
+
+    previewInputs.forEach(function (input) {
+      input.addEventListener("input", function () {
+        collectPayload();
+      });
+    });
+
+    refs.images.addEventListener("change", function () {
+      renderImagePreview();
+      collectPayload();
+    });
+
+    refs.documents.addEventListener("change", function () {
+      renderDocumentList();
+      collectPayload();
+    });
+
+    refs.categories.addEventListener("change", function () {
+      collectPayload();
+    });
+
+    refs.addCategoryBtn.addEventListener("click", function () {
+      addCatDropdown().focus();
+      collectPayload();
+    });
+
+    refs.loadUpdateSampleBtn.addEventListener("click", function () {
+      refs.updateBodyJson.value = serialize(defaultUpdateBody());
+    });
+
+    refs.venueName.addEventListener("change", function () {
+      populateLayoutOptions(true);
+      collectPayload();
+    });
+
+    refs.layoutName.addEventListener("change", function () {
+      syncSeatCountFromLayout(true);
+      collectPayload();
+    });
+
+    refs.seatCount.addEventListener("input", function () {
+      refs.seatCount.dataset.autoFilled = "false";
+    });
+
+    refs.eventForm.addEventListener("submit", runCreateFlow);
+    refs.listEventsForm.addEventListener("submit", runListEvents);
+    refs.getEventByIdForm.addEventListener("submit", runGetEventById);
+    refs.getEventCategoriesForm.addEventListener("submit", runGetEventCategories);
+    refs.openEventPageBtn.addEventListener("click", function () {
+      var eventId = refs.getEventId.value.trim();
+      if (!eventId) {
+        setResponseMeta("error", "Provide an event ID before opening the event page.");
+        appendLog("Navigation blocked", "event id is required to open event page");
+        return;
+      }
+      window.location.href = "event.html?id=" + encodeURIComponent(eventId);
+    });
+    refs.openSearchPageBtn.addEventListener("click", function () {
+      window.location.href = "search.html";
+    });
+    refs.getByCategoryForm.addEventListener("submit", runGetByCategory);
+    refs.getByDateForm.addEventListener("submit", runGetByDate);
+    refs.getImageMetadataForm.addEventListener("submit", runGetImageMetadata);
+    refs.updateEventForm.addEventListener("submit", runUpdateEvent);
+    refs.cancelEventForm.addEventListener("submit", runCancelEvent);
+    refs.clearOutputsBtn.addEventListener("click", clearOutputs);
+
+    populateVenueOptions();
+    populateLayoutOptions(true);
+    addCatDropdown();
+    refs.updateBodyJson.value = serialize(defaultUpdateBody());
+    renderDocumentList();
+    collectPayload();
+    setResponseMeta("info", "Ready to test APIs.");
+    appendLog("Console ready.");
+  </script>
+</body>
+</html>

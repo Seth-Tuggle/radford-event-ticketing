@@ -1,0 +1,463 @@
+/* =============================================================================
+   index.css — Global stylesheet for the React SPA
+   -----------------------------------------------------------------------------
+   Loaded once from src/main.jsx. Responsibilities:
+     - Pulls in shared-shell.css so the header/nav/footer styles match exactly
+       between the React app and the static venue.html page.
+     - Declares the design-token CSS custom properties in :root (colors,
+       radius, shadow, transitions, max content width). Components should
+       reference these tokens — never hard-code hex values — so theme changes
+       happen in one place.
+     - Applies the global body baseline: font stack, page background color,
+       and the decorative mountain-silhouette SVG at the bottom of the page.
+   ========================================================================== */
+
+/* shared-shell.css is the single source of truth for header, nav, and footer */
+@import url('/shared-shell.css');
+
+/* --------------------------------------------------------------------------
+   Design tokens
+   Reference these via var(--token-name) throughout the app.
+   -------------------------------------------------------------------------- */
+:root {
+  --radford-red: #b11226;          /* Primary brand color (Radford red) */
+  --radford-red-dark: #8e0e1e;     /* Hover/pressed brand-red variant */
+  --navy-accent: #0d1b2a;          /* Dark accent used for toasts, footer */
+  --mountain-grey: #e5e7eb;        /* Subtle divider / mountain silhouette */
+  --neutral-grey: #6b7280;         /* Secondary text */
+  --light-grey: #f3f4f6;           /* Default page background */
+  --white: #ffffff;
+  --black: #111827;
+  --radius: 10px;                  /* Shared corner radius for cards/buttons */
+  --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.08); /* Card elevation */
+  --transition: all 0.25s ease;    /* Default animation timing */
+  --max-width: 1200px;             /* Max centered content width */
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--light-grey);
+  color: var(--black);
+  line-height: 1.6;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 200 L150 120 L300 180 L450 90 L600 200 L750 110 L900 170 L1050 130 L1200 200 V300 H0 Z' fill='%23d1d5db' opacity='0.4'/%3E%3Cpath d='M0 220 L200 160 L400 200 L600 140 L800 210 L1000 170 L1200 220 V300 H0 Z' fill='%23e5e7eb' opacity='0.6'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-position: bottom;
+  background-size: 1200px 300px;
+}
+
+.app { min-height: 100vh; display: flex; flex-direction: column; }
+
+/* ── Main layout ── */
+.main-container {
+  max-width: var(--max-width);
+  margin: 2rem auto;
+  padding: 0 2rem;
+  flex: 1;
+  width: 100%;
+}
+/* `.mountain-section` is the main content card used by the React SPA pages.
+   `.content-section` is an alias used by the TransactionHistory view — kept
+   as a multi-selector so both names share a single source of truth. */
+.mountain-section,
+.content-section {
+  background: var(--white);
+  padding: 2rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── Transaction History: section heading ── */
+.section-title {
+  color: var(--radford-red);
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+/* ── Cards ── */
+.ticket-card {
+  background: var(--white);
+  border-left: 6px solid var(--radford-red);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.ticket-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
+.ticket-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 0.4rem; }
+.ticket-meta { color: var(--neutral-grey); font-size: 0.9rem; margin-bottom: 0.75rem; line-height: 1.6; }
+
+/* ── Filter toolbar ── */
+/* Toolbar pairs a search input with one or more dropdown filters.
+   On narrow viewports the controls wrap; the search input grows to fill. */
+.filter-bar {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: stretch;
+  margin-bottom: 2rem;
+}
+.filter-search {
+  position: relative;
+  flex: 1 1 280px;
+  min-width: 220px;
+}
+/* Emoji glyphs ignore line-height for positioning, so we give the span an
+   explicit size + line-height equal to the input height and center the glyph
+   inside it. font-variant-emoji forces the color (emoji) presentation on
+   platforms that would otherwise render 🔍 as a small monochrome glyph. */
+.filter-search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 0;
+  height: 44px;
+  width: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  line-height: 1;
+  font-variant-emoji: emoji;
+  pointer-events: none;
+}
+.filter-search-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 1rem 0 2.4rem;
+  border: 1px solid var(--mountain-grey);
+  border-radius: var(--radius);
+  background: var(--white);
+  color: var(--black);
+  font-size: 0.95rem;
+  font-family: inherit;
+  box-shadow: var(--shadow-soft);
+  transition: var(--transition);
+}
+.filter-search-input::placeholder { color: var(--neutral-grey); }
+.filter-search-input:hover { border-color: #cbd5e1; }
+.filter-search-input:focus {
+  outline: none;
+  border-color: var(--radford-red);
+  box-shadow: 0 0 0 3px rgba(177, 18, 38, 0.15);
+}
+.filter-select {
+  height: 44px;
+  min-width: 200px;
+  padding: 0 2.4rem 0 1rem;
+  border: 1px solid var(--mountain-grey);
+  border-radius: var(--radius);
+  background-color: var(--white);
+  color: var(--black);
+  font-size: 0.95rem;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+  appearance: none;
+  -webkit-appearance: none;
+  /* Inline SVG chevron, tinted neutral-grey, pinned to the right edge. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  transition: var(--transition);
+}
+.filter-select:hover { border-color: #cbd5e1; }
+.filter-select:focus {
+  outline: none;
+  border-color: var(--radford-red);
+  box-shadow: 0 0 0 3px rgba(177, 18, 38, 0.15);
+}
+
+/* ── Buttons ── */
+.btn-primary {
+  background: var(--radford-red);
+  color: white;
+  border: none;
+  padding: 0.7rem 1.4rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+.btn-primary:hover { background: var(--radford-red-dark); transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(0); }
+.btn-primary:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+
+.btn-secondary {
+  background: transparent;
+  color: var(--radford-red);
+  border: 1.5px solid var(--radford-red);
+  padding: 0.7rem 1.4rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+.btn-secondary:hover { background: var(--radford-red); color: white; transform: translateY(-1px); }
+.btn-secondary:active { transform: translateY(0); }
+.btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.btn-accent {
+  background: var(--navy-accent);
+  color: white;
+  border: none;
+  padding: 0.7rem 1.4rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+.btn-accent:hover { background: #1a2f4a; transform: translateY(-1px); }
+.btn-accent:active { transform: translateY(0); }
+
+/* ── Inputs ── */
+input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  border-radius: var(--radius);
+  border: 2px solid var(--mountain-grey);
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
+}
+input:focus { border-color: var(--radford-red); outline: none; }
+
+/* ── Empty / loading states ── */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--neutral-grey);
+}
+.empty-state-icon { font-size: 3rem; margin-bottom: 1rem; }
+.empty-state p { font-size: 1.05rem; }
+
+.loading-state {
+  text-align: center;
+  padding: 3rem;
+  color: var(--neutral-grey);
+  font-size: 1rem;
+}
+
+/* ── Login two-column layout ── */
+.login-container {
+  display: flex;
+  min-height: 600px;
+  align-items: stretch;
+}
+.login-brand {
+  flex: 1;
+  background: linear-gradient(135deg, var(--radford-red), var(--radford-red-dark));
+  border-radius: var(--radius) 0 0 var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+}
+.login-form-panel {
+  flex: 1.4;
+  padding: 3.5rem 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 480px;
+}
+
+/* ── Auth card ── */
+.auth-card {
+  max-width: 420px;
+  margin: 2rem auto;
+  background: var(--white);
+  padding: 2.5rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+  text-align: center;
+}
+.auth-card h2 { color: var(--radford-red); margin-bottom: 1.5rem; font-size: 1.8rem; }
+.auth-tabs { display: flex; background: var(--light-grey); border-radius: var(--radius); padding: 4px; margin-bottom: 1.5rem; }
+.auth-tab {
+  flex: 1;
+  padding: 0.75rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  transition: var(--transition);
+}
+.auth-tab.active { background: var(--radford-red); color: white; }
+
+/* ── Cart item responsive layout ── */
+.cart-item-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.cart-item-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.4rem;
+  min-width: 140px;
+}
+
+/* ── QR grid (My Tickets) ── */
+.qr-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+/* ── Responsive: tablet ── */
+@media (max-width: 768px) {
+  .main-container { margin: 1rem auto; padding: 0 1rem; }
+  .mountain-section { padding: 1.25rem; }
+
+  .ticket-card { padding: 1.1rem; }
+  .ticket-title { font-size: 1.05rem; }
+
+  .auth-card { padding: 1.5rem; margin: 1rem auto; }
+
+  .login-container { flex-direction: column; min-height: auto; }
+  .login-brand {
+    border-radius: var(--radius) var(--radius) 0 0;
+    padding: 1.5rem;
+  }
+  .login-brand svg { width: 64px; height: 64px; }
+  .login-form-panel { max-width: 100%; padding: 2rem 1.5rem; }
+}
+
+/* ── Responsive: mobile ── */
+@media (max-width: 480px) {
+  .main-container { margin: 0.75rem auto; padding: 0 0.75rem; }
+  .mountain-section { padding: 1rem; border-radius: 8px; }
+
+  .ticket-card { padding: 1rem; }
+
+  .btn-primary, .btn-accent { padding: 0.65rem 1rem; font-size: 0.9rem; }
+
+  /* Cart: stack event details above price/buttons on narrow screens */
+  .cart-item-inner { flex-direction: column; align-items: stretch; }
+  .cart-item-actions {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    min-width: unset;
+    width: 100%;
+  }
+
+  /* Single column QR on mobile — 2 col is too cramped */
+  .qr-grid { grid-template-columns: 1fr; }
+
+  .login-brand { padding: 1rem; }
+  .login-brand svg { width: 48px; height: 48px; }
+  .login-form-panel { padding: 1.5rem 1rem; }
+}
+
+/* ── Transaction History page ──────────────────────────────────────────────
+   Styles for <TransactionHistory>. Separate `.empty-message` is used there
+   instead of reusing `.empty-state` so the transaction-empty copy can be
+   styled/translated independently of the empty-events copy. */
+.empty-message {
+  font-size: 1rem;
+}
+
+.transactions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.transaction-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: var(--light-grey);
+  border-radius: var(--radius);
+  transition: var(--transition);
+}
+
+.transaction-item:hover {
+  box-shadow: var(--shadow-soft);
+}
+
+.transaction-info {
+  flex: 1;
+  min-width: 200px;
+}
+
+.transaction-event {
+  font-weight: 600;
+  color: var(--black);
+  margin-bottom: 0.25rem;
+}
+
+.transaction-meta {
+  font-size: 0.85rem;
+  color: var(--neutral-grey);
+}
+
+.transaction-amount {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--radford-red);
+  min-width: 60px;
+  text-align: right;
+  margin: 0 1rem;
+}
+
+/* Green accent for $0 (free) transactions, distinguishing them from paid. */
+.transaction-amount.free {
+  color: #059669;
+}
+
+.transaction-time {
+  font-size: 0.85rem;
+  color: var(--neutral-grey);
+  min-width: 80px;
+  text-align: right;
+}
+
+/* Stack transaction rows on narrow screens so labels and amounts aren't squeezed. */
+@media (max-width: 600px) {
+  .transaction-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .transaction-amount,
+  .transaction-time {
+    text-align: left;
+    margin: 0;
+  }
+}
+
+/*Trending page */
+.section-title {color: var(--radford-red);margin-bottom: 1.5rem;}
+.category-selector {display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 2rem;}
+.event-info {display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;gap: 1rem;}
+.ticket-flex {flex: 1;}
+.view-event-button{display: flex; align-items: center; gap: 1rem; }
+
+/*Analytics Overview */
+.analytics-overview-grid {display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;}
+.analytics-overview-card {background: var(--white); border: 2px solid var(--mountain-grey); border-radius: var(--radius); padding: 1.5rem; text-align: center; transition: var(--transition);min-width: 0;}
+.stat-card { background: var(--white); border: 2px solid var(--mountain-grey); border-radius: var(--radius); padding: 1.5rem; text-align: center; transition: var(--transition); }
+.stat-card:hover { border-color: var(--radford-red); transform: translateY(-2px); }
+.stat-label { font-size: 0.9rem; color: var(--neutral-grey); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem; }
+.stat-value { font-size: 2.5rem; font-weight: bold; color: var(--radford-red); margin-bottom: 0.5rem; }
+.stat-change { font-size: 0.85rem; font-weight: 500; }
+.stat-change.positive { color: var(--success-green); }
+.stat-change.neutral { color: var(--neutral-grey); }

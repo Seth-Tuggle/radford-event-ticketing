@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Highland Pass | Event Detail</title>
+  <link rel="stylesheet" href="mocksite.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="site-header" data-reveal="1">
+      <div class="site-header-inner">
+        <a class="brand" href="index.html">
+          <span class="brand-mark">HP</span>
+          <span class="brand-text">
+            <span class="brand-title">Highland Pass</span>
+            <span class="brand-subtitle">Event detail view</span>
+          </span>
+        </a>
+        <nav class="nav-links" aria-label="Primary">
+          <a class="nav-link" href="index.html">Discover</a>
+          <a class="nav-link" href="planner.html">Week Planner</a>
+          <a class="nav-link" href="organizer.html">Organizer Studio</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="glass-panel" data-reveal="2">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Direct load</div>
+            <h1 class="section-title">Open any event by ID</h1>
+          </div>
+          <div class="section-copy">
+            This page uses the event-by-id route, category-only route, image metadata route, and signed document download route together.
+          </div>
+        </div>
+        <form id="loadEventForm" class="filter-shell">
+          <div class="field-grid">
+            <div class="field field-span-8">
+              <label for="eventIdInput">Event ID</label>
+              <input id="eventIdInput" type="text" placeholder="evt-doc-example">
+            </div>
+            <div class="field field-span-4">
+              <label>&nbsp;</label>
+              <button class="button" type="submit">Load event</button>
+            </div>
+          </div>
+        </form>
+        <div id="pageStatus" class="status-banner info is-visible">Enter an event ID or open this page with ?id=...</div>
+      </section>
+
+      <section class="section event-detail-shell" data-reveal="3">
+        <div class="detail-grid">
+          <div class="stack">
+            <div class="detail-hero">
+              <img id="heroImage" src="" alt="Event hero image">
+            </div>
+
+            <article class="glass-panel">
+              <div class="chip-row" id="categoryChips"></div>
+              <h2 id="eventTitle" class="detail-title">Select an event to begin</h2>
+              <p id="eventLead" class="detail-lead">The event story, cadence, and practical details will appear here after load.</p>
+              <div class="detail-meta-grid">
+                <div class="meta-card">
+                  <div class="meta-label">When</div>
+                  <strong id="eventWhen">TBD</strong>
+                </div>
+                <div class="meta-card">
+                  <div class="meta-label">Where</div>
+                  <strong id="eventWhere">Location TBD</strong>
+                </div>
+              </div>
+            </article>
+
+            <article class="info-panel">
+              <div class="section-head">
+                <div>
+                  <div class="eyebrow">Story</div>
+                  <h3 class="panel-title">What this event feels like</h3>
+                </div>
+              </div>
+              <p id="eventDescription" class="rich-copy">Description content will appear here.</p>
+            </article>
+
+            <article class="summary-panel">
+              <div class="section-head">
+                <div>
+                  <div class="eyebrow">Documents</div>
+                  <h3 class="panel-title">Attachments and downloads</h3>
+                </div>
+              </div>
+              <div id="documentsList" class="doc-list">
+                <div class="empty-state">Documents will appear after the event loads.</div>
+              </div>
+            </article>
+          </div>
+
+          <aside class="stack">
+            <article class="metric-list">
+              <div class="metric-item">
+                <div>
+                  <div class="metric-label">Event ID</div>
+                  <div class="metric-value" id="metricEventId">-</div>
+                </div>
+              </div>
+              <div class="metric-item">
+                <div>
+                  <div class="metric-label">Venue</div>
+                  <div class="metric-value" id="metricVenue">-</div>
+                </div>
+              </div>
+              <div class="metric-item">
+                <div>
+                  <div class="metric-label">Layout</div>
+                  <div class="metric-value" id="metricLayout">-</div>
+                </div>
+              </div>
+              <div class="metric-item">
+                <div>
+                  <div class="metric-label">Seats</div>
+                  <div class="metric-value" id="metricSeats">-</div>
+                </div>
+              </div>
+              <div class="metric-item">
+                <div>
+                  <div class="metric-label">Pricing</div>
+                  <div class="metric-value" id="metricPricing">Free</div>
+                </div>
+              </div>
+              <div class="metric-item">
+                <div>
+                  <div class="metric-label">Sync status</div>
+                  <div class="metric-value" id="metricSync">-</div>
+                </div>
+              </div>
+            </article>
+
+            <article class="response-card">
+              <div class="section-head">
+                <div>
+                  <div class="eyebrow">Category route</div>
+                  <h3 class="panel-title">Categories only</h3>
+                </div>
+              </div>
+              <div id="categoriesOnly" class="chip-row">
+                <span class="chip">No category payload yet</span>
+              </div>
+            </article>
+
+            <article class="warning-card">
+              <div class="section-head">
+                <div>
+                  <div class="eyebrow">Related lane</div>
+                  <h3 class="panel-title">More like this</h3>
+                </div>
+              </div>
+              <div id="relatedEvents" class="stack">
+                <div class="empty-state">Related events will appear after category data loads.</div>
+              </div>
+            </article>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div>Event detail mock page using live read, category, image, and document flows.</div>
+    </footer>
+  </div>
+
+  <script src="mocksite.js"></script>
+  <script>
+    (function () {
+      var App = window.MockSite;
+      var safe = App.escapeHtml;
+      var state = {
+        currentId: ""
+      };
+
+      var refs = {
+        loadEventForm: document.getElementById("loadEventForm"),
+        eventIdInput: document.getElementById("eventIdInput"),
+        pageStatus: document.getElementById("pageStatus"),
+        heroImage: document.getElementById("heroImage"),
+        categoryChips: document.getElementById("categoryChips"),
+        eventTitle: document.getElementById("eventTitle"),
+        eventLead: document.getElementById("eventLead"),
+        eventWhen: document.getElementById("eventWhen"),
+        eventWhere: document.getElementById("eventWhere"),
+        eventDescription: document.getElementById("eventDescription"),
+        documentsList: document.getElementById("documentsList"),
+        metricEventId: document.getElementById("metricEventId"),
+        metricVenue: document.getElementById("metricVenue"),
+        metricLayout: document.getElementById("metricLayout"),
+        metricSeats: document.getElementById("metricSeats"),
+        metricPricing: document.getElementById("metricPricing"),
+        metricSync: document.getElementById("metricSync"),
+        categoriesOnly: document.getElementById("categoriesOnly"),
+        relatedEvents: document.getElementById("relatedEvents")
+      };
+
+      function setStatus(type, message) {
+        refs.pageStatus.className = "status-banner is-visible " + type;
+        refs.pageStatus.textContent = message;
+      }
+
+      function setHero(url) {
+        refs.heroImage.src = url || App.DEFAULT_PLACEHOLDER_IMAGE;
+      }
+
+      function renderDocuments(items) {
+        refs.documentsList.innerHTML = "";
+        var documents = App.toList(items);
+        if (!documents.length) {
+          refs.documentsList.innerHTML = "<div class='empty-state'>No documents are attached to this event.</div>";
+          return;
+        }
+
+        documents.forEach(function (doc) {
+          var docPath = App.extractAssetPath(doc);
+          var label = App.extractAssetLabel(doc, App.readText(docPath, "document"));
+          var link = document.createElement("a");
+          link.className = "doc-link";
+          link.href = "#";
+          link.innerHTML =
+            "<span>" + safe(label) + "</span>" +
+            "<small>Secure download</small>";
+          link.addEventListener("click", function (event) {
+            event.preventDefault();
+            if (!state.currentId) {
+              setStatus("error", "An event ID is required before downloading documents.");
+              return;
+            }
+            setStatus("info", "Preparing a secure document download...");
+            App.downloadDocument(state.currentId, doc)
+              .then(function () {
+                setStatus("success", "Download started.");
+              })
+              .catch(function (error) {
+                setStatus("error", "Could not download document: " + error.message);
+              });
+          });
+          refs.documentsList.appendChild(link);
+        });
+      }
+
+      function renderCategories(target, categories, emptyText) {
+        target.innerHTML = "";
+        if (!categories.length) {
+          target.innerHTML = "<span class='chip'>" + safe(emptyText) + "</span>";
+          return;
+        }
+        categories.forEach(function (category) {
+          var tag = document.createElement("span");
+          tag.className = "tag";
+          tag.textContent = category;
+          target.appendChild(tag);
+        });
+      }
+
+      function renderRelated(items, currentId) {
+        refs.relatedEvents.innerHTML = "";
+        var filtered = items.filter(function (item) {
+          return App.pickEventId(item) && App.pickEventId(item) !== currentId;
+        }).slice(0, 3);
+
+        if (!filtered.length) {
+          refs.relatedEvents.innerHTML = "<div class='empty-state'>No related events were returned for this category yet.</div>";
+          return;
+        }
+
+        filtered.forEach(function (item) {
+          refs.relatedEvents.appendChild(App.createEventCard(item));
+        });
+      }
+
+      function renderEvent(eventData, categoriesOnly, heroUrl) {
+        state.currentId = App.pickEventId(eventData);
+        refs.eventIdInput.value = state.currentId;
+
+        setHero(heroUrl || App.pickHero(eventData));
+        renderCategories(refs.categoryChips, App.toList(eventData.categories), "General");
+        renderCategories(refs.categoriesOnly, categoriesOnly, "No categories returned");
+
+        refs.eventTitle.textContent = App.readText(eventData.event_name, "Untitled event");
+        refs.eventLead.textContent = "Live event detail built from multiple event APIs working together.";
+        refs.eventWhen.textContent = App.formatDateTime(eventData.date_time || eventData.start_date_time || eventData.start_time);
+        refs.eventWhere.textContent = App.readText(eventData.location, "Location TBD");
+        refs.eventDescription.textContent = App.readText(eventData.description, "No description provided.");
+
+        refs.metricEventId.textContent = state.currentId || "-";
+        refs.metricVenue.textContent = App.readText(eventData.venue_name, "Not provided");
+        refs.metricLayout.textContent = App.readText(eventData.layout_name, "Not provided");
+        refs.metricSeats.textContent = App.readText(eventData.seat_count, "Not provided");
+        refs.metricPricing.textContent = App.formatPriceSummary(eventData);
+        refs.metricSync.textContent = App.readText(eventData.ticket_sync_status, "Unknown");
+
+        renderDocuments(eventData.documents || eventData.docs || eventData.attachments);
+      }
+
+      async function loadEvent(eventId) {
+        var id = App.readText(eventId, "");
+        if (!id) {
+          setStatus("error", "Please enter an event ID.");
+          return;
+        }
+
+        setStatus("info", "Loading event details...");
+        refs.relatedEvents.innerHTML = "<div class='empty-state'>Loading related events...</div>";
+
+        try {
+          var eventPayload = await App.fetchEventById(id);
+          var eventData = App.pickEventData(eventPayload);
+          var categoriesPromise = App.fetchEventCategories(id).catch(function () { return []; });
+          var imageMetadataPromise = App.fetchImageMetadata(id).catch(function () { return null; });
+
+          var loaded = await Promise.all([categoriesPromise, imageMetadataPromise]);
+          var categoriesOnly = App.toList(loaded[0]);
+          var imageMetadata = loaded[1];
+          var heroUrl = App.pickHero(eventData);
+
+          if (imageMetadata && imageMetadata.heroImageUrl) {
+            heroUrl = imageMetadata.heroImageUrl;
+          }
+
+          renderEvent(eventData, categoriesOnly, heroUrl);
+
+          var primaryCategory = categoriesOnly[0] || App.toList(eventData.categories)[0];
+          if (primaryCategory) {
+            var relatedPayload = await App.fetchByCategory(primaryCategory, 4).catch(function () { return { items: [] }; });
+            renderRelated(App.pickItems(relatedPayload), id);
+          } else {
+            refs.relatedEvents.innerHTML = "<div class='empty-state'>This event does not expose a category to build related results from.</div>";
+          }
+
+          setStatus("success", "Event loaded.");
+        } catch (error) {
+          setStatus("error", "Could not load event: " + error.message);
+        }
+      }
+
+      refs.loadEventForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        loadEvent(refs.eventIdInput.value);
+      });
+
+      var initialId = new URLSearchParams(window.location.search).get("id");
+      if (initialId) {
+        refs.eventIdInput.value = initialId;
+        loadEvent(initialId);
+      }
+    }());
+  </script>
+</body>
+</html>

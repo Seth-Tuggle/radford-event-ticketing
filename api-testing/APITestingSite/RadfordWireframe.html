@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Radford Events Ticketing - Wireframe</title>
+  <link rel="stylesheet" href="RadfordTicketing.css">
+</head>
+<body>
+  <div id="app" class="app">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-inner">
+        <div class="header-logo">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="24" cy="24" r="22" fill="white" stroke="#b11226" stroke-width="2"/>
+            <text x="24" y="30" font-size="20" font-weight="bold" fill="#b11226" text-anchor="middle" font-family="serif">R</text>
+          </svg>
+        </div>
+        <h1 class="header-title">Radford Events Ticketing</h1>
+        <div class="header-actions">
+          <span class="user-status">Not logged in</span>
+          <!-- When logged in: -->
+          <!-- <span class="user-status">👤 developer@example.com</span> -->
+          <!-- Admin only: -->
+          <!-- <button class="btn-admin">Admin Dashboard</button> -->
+        </div>
+      </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="nav-buttons">
+          <button class="nav-btn active">🗓️ Browse Events</button>
+          <button class="nav-btn">🛒 Cart (0)</button>
+          <button class="nav-btn">🎫 My Tickets (0)</button>
+          <button class="nav-btn">🔐 Login</button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-container">
+      <div class="content-section mountain-section">
+        
+        <!-- Browse Events View -->
+        <div class="view-browse">
+          <h2 class="section-title">Browse Events</h2>
+          
+          <!-- Category Selector -->
+          <div class="category-selector">
+            <button class="category-btn active">🗓️ Upcoming</button>
+            <button class="category-btn">🏆 Athletics</button>
+            <button class="category-btn">🎓 On Campus</button>
+            <button class="category-btn">🎉 Social</button>
+          </div>
+
+          <!-- Events List -->
+          <div class="events-list">
+            <!-- Event Card 1 -->
+            <div class="event-card ticket-card">
+              <div class="event-card-content">
+                <div class="event-info">
+                  <h3 class="event-title ticket-title">Football vs. Virginia Tech</h3>
+                  <div class="event-meta ticket-meta">
+                    <div class="meta-item">📅 Oct 15, 2026 • 🕐 7:00 PM</div>
+                    <div class="meta-item">📍 Sherman Stadium</div>
+                    <div class="meta-item">💺 450 tickets available</div>
+                  </div>
+                </div>
+                <div class="event-actions">
+                  <div class="event-price">$25</div>
+                  <button class="btn-primary">Add to Cart</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Event Card 2 - Free Event -->
+            <div class="event-card ticket-card">
+              <div class="event-card-content">
+                <div class="event-info">
+                  <h3 class="event-title ticket-title">Spring Career Fair</h3>
+                  <div class="event-meta ticket-meta">
+                    <div class="meta-item">📅 Feb 20, 2026 • 🕐 10:00 AM</div>
+                    <div class="meta-item">📍 Heth Hall</div>
+                    <div class="meta-item">💺 500 spots available</div>
+                  </div>
+                </div>
+                <div class="event-actions">
+                  <div class="event-price event-price-free">FREE</div>
+                  <button class="btn-primary">Reserve Spot</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Event Card 3 -->
+            <div class="event-card ticket-card">
+              <div class="event-card-content">
+                <div class="event-info">
+                  <h3 class="event-title ticket-title">Fall Festival</h3>
+                  <div class="event-meta ticket-meta">
+                    <div class="meta-item">📅 Oct 31, 2026 • 🕐 6:00 PM</div>
+                    <div class="meta-item">📍 Muse Lawn</div>
+                    <div class="meta-item">💺 1500 tickets available</div>
+                  </div>
+                </div>
+                <div class="event-actions">
+                  <div class="event-price">$5</div>
+                  <button class="btn-primary">Add to Cart</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cart View (hidden by default) -->
+        <div class="view-cart" style="display: none;">
+          <h2 class="section-title">Shopping Cart</h2>
+          
+          <!-- Empty Cart State -->
+          <div class="empty-state">
+            <p class="empty-message">Your cart is empty</p>
+            <button class="btn-primary">Browse Events</button>
+          </div>
+
+          <!-- Cart with Items -->
+          <div class="cart-items" style="display: none;">
+            <!-- Cart Item -->
+            <div class="cart-item ticket-card">
+              <div class="cart-item-content">
+                <div class="cart-item-info">
+                  <h3 class="ticket-title">Football vs. Virginia Tech</h3>
+                  <div class="ticket-meta">Oct 15, 2026 • 7:00 PM</div>
+                </div>
+                <div class="cart-item-actions">
+                  <div class="quantity-controls">
+                    <button class="btn-quantity">−</button>
+                    <span class="quantity-value">2</span>
+                    <button class="btn-quantity">+</button>
+                  </div>
+                  <div class="item-price">$50</div>
+                  <button class="btn-accent">Remove</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Cart Summary -->
+            <div class="cart-summary ticket-card">
+              <div class="summary-content">
+                <h3 class="summary-title">Total</h3>
+                <div class="summary-total">$50</div>
+              </div>
+              <button class="btn-primary btn-checkout">Complete Purchase</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- My Tickets View (hidden by default) -->
+        <div class="view-tickets" style="display: none;">
+          <h2 class="section-title">My Tickets</h2>
+          
+          <!-- Empty Tickets State -->
+          <div class="empty-state">
+            <p class="empty-message">You haven't reserved any tickets yet</p>
+            <button class="btn-primary">Browse Events</button>
+          </div>
+
+          <!-- Tickets List -->
+          <div class="tickets-list" style="display: none;">
+            <!-- Ticket Card -->
+            <div class="ticket-item ticket-card">
+              <h3 class="ticket-title">Football vs. Virginia Tech</h3>
+              <div class="ticket-meta">
+                <div>📅 Oct 15, 2026 • 🕐 7:00 PM</div>
+                <div>📍 Sherman Stadium</div>
+                <div>🎫 Quantity: 2</div>
+                <div>📅 Purchased: 01/29/2026</div>
+              </div>
+              <div class="qr-code-container">
+                <div class="qr-icon">📱</div>
+                <div class="qr-code">QR-ABC123XYZ</div>
+                <div class="qr-label">QR Code (Show at entry)</div>
+              </div>
+              <div class="ticket-actions">
+                <button class="btn-primary">Download PDF</button>
+                <button class="btn-accent">Transfer Ticket</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Login View (hidden by default) -->
+        <div class="view-login" style="display: none;">
+          <h2 class="section-title">Login</h2>
+          <form class="login-form">
+            <input type="email" placeholder="Enter your email" required class="input-field">
+            <button type="submit" class="btn-primary btn-full-width">Login</button>
+            <p class="form-note">This is a demo - enter any valid email to "login"</p>
+          </form>
+        </div>
+
+        <!-- Admin Analytics View (hidden by default, admin only) -->
+        <div class="view-admin" style="display: none;">
+          <h2 class="section-title">Admin Analytics Dashboard</h2>
+          
+          <!-- Stats Cards -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">Total Events</div>
+              <div class="stat-value">24</div>
+              <div class="stat-change positive">+3 this month</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Tickets Sold</div>
+              <div class="stat-value">1,247</div>
+              <div class="stat-change positive">+156 this week</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Revenue</div>
+              <div class="stat-value">$18,450</div>
+              <div class="stat-change positive">+$2,340 this week</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Active Users</div>
+              <div class="stat-value">892</div>
+              <div class="stat-change neutral">+45 today</div>
+            </div>
+          </div>
+
+          <!-- Charts Section -->
+          <div class="analytics-charts">
+            <div class="chart-card ticket-card">
+              <h3 class="chart-title">Ticket Sales by Category</h3>
+              <div class="chart-placeholder">
+                <div class="bar-chart">
+                  <div class="bar-item">
+                    <div class="bar-label">Athletics</div>
+                    <div class="bar-fill" style="width: 75%;">
+                      <span class="bar-value">680</span>
+                    </div>
+                  </div>
+                  <div class="bar-item">
+                    <div class="bar-label">Social</div>
+                    <div class="bar-fill" style="width: 45%;">
+                      <span class="bar-value">410</span>
+                    </div>
+                  </div>
+                  <div class="bar-item">
+                    <div class="bar-label">On Campus</div>
+                    <div class="bar-fill" style="width: 20%;">
+                      <span class="bar-value">157</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="chart-card ticket-card">
+              <h3 class="chart-title">Recent Transactions</h3>
+              <div class="transactions-list">
+                <div class="transaction-item">
+                  <div class="transaction-info">
+                    <div class="transaction-event">Football vs. Virginia Tech</div>
+                    <div class="transaction-meta">2 tickets • developer@example.com</div>
+                  </div>
+                  <div class="transaction-amount">$50</div>
+                  <div class="transaction-time">2 min ago</div>
+                </div>
+                <div class="transaction-item">
+                  <div class="transaction-info">
+                    <div class="transaction-event">Spring Career Fair</div>
+                    <div class="transaction-meta">1 spot • developer@example.com</div>
+                  </div>
+                  <div class="transaction-amount free">FREE</div>
+                  <div class="transaction-time">15 min ago</div>
+                </div>
+                <div class="transaction-item">
+                  <div class="transaction-info">
+                    <div class="transaction-event">Basketball vs. VCU</div>
+                    <div class="transaction-meta">4 tickets • developer@example.com</div>
+                  </div>
+                  <div class="transaction-amount">$60</div>
+                  <div class="transaction-time">1 hour ago</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Event Management -->
+          <div class="event-management ticket-card">
+            <h3 class="chart-title">Event Management</h3>
+            <div class="admin-actions">
+              <button class="btn-primary">Create New Event</button>
+              <button class="btn-accent">Export Report</button>
+              <button class="btn-accent">Manage Users</button>
+            </div>
+            
+            <div class="events-table">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Event Name</th>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th>Sold/Total</th>
+                    <th>Revenue</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Football vs. Virginia Tech</td>
+                    <td>Oct 15, 2026</td>
+                    <td><span class="badge badge-athletics">Athletics</span></td>
+                    <td>450/1000</td>
+                    <td>$11,250</td>
+                    <td>
+                      <button class="btn-small">Edit</button>
+                      <button class="btn-small">View</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Spring Career Fair</td>
+                    <td>Feb 20, 2026</td>
+                    <td><span class="badge badge-campus">On Campus</span></td>
+                    <td>157/500</td>
+                    <td>FREE</td>
+                    <td>
+                      <button class="btn-small">Edit</button>
+                      <button class="btn-small">View</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Fall Festival</td>
+                    <td>Oct 31, 2026</td>
+                    <td><span class="badge badge-social">Social</span></td>
+                    <td>1200/1500</td>
+                    <td>$6,000</td>
+                    <td>
+                      <button class="btn-small">Edit</button>
+                      <button class="btn-small">View</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p class="footer-text"> 2026 Radford University</p>
+      <p class="footer-subtext">CS472 Go Highlanders!</p>
+    </footer>
+  </div>
+</body>
+</html>

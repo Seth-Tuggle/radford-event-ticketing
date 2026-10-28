@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Radford Event Page Preview</title>
+  <link rel="stylesheet" href="RadfordTicketing.css">
+  <style>
+    .event-preview-layout {
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .event-hero {
+      width: 100%;
+      height: 340px;
+      object-fit: cover;
+      border-radius: var(--radius);
+      border: 1px solid var(--mountain-grey);
+      background: var(--light-grey);
+      margin-bottom: 1rem;
+    }
+
+    .event-title-lg {
+      font-size: 1.9rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: var(--black);
+    }
+
+    .event-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .event-meta-card {
+      border: 1px solid var(--mountain-grey);
+      border-radius: var(--radius);
+      padding: 0.75rem;
+      background: var(--light-grey);
+    }
+
+    .event-meta-label {
+      color: var(--neutral-grey);
+      font-size: 0.85rem;
+      margin-bottom: 0.25rem;
+      font-weight: 600;
+    }
+
+    .event-description {
+      color: var(--black);
+      margin-bottom: 1rem;
+      white-space: pre-wrap;
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .event-chip {
+      display: inline-block;
+      padding: 0.3rem 0.7rem;
+      border-radius: 999px;
+      background: #fee2e2;
+      color: #991b1b;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .docs-list {
+      margin: 0;
+      padding-left: 1.2rem;
+    }
+
+    .docs-list li {
+      margin: 0.4rem 0;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <div class="header-inner">
+        <div class="header-logo" aria-hidden="true">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="24" cy="24" r="22" fill="white" stroke="#b11226" stroke-width="2"></circle>
+            <text x="24" y="30" font-size="20" font-weight="bold" fill="#b11226" text-anchor="middle" font-family="serif">R</text>
+          </svg>
+        </div>
+        <h1 class="header-title">Radford Event Preview</h1>
+        <div class="header-actions">
+          <span class="user-status">API-Powered Event Details</span>
+        </div>
+      </div>
+    </header>
+
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="nav-buttons">
+          <button class="nav-btn" id="backToConsoleBtn" type="button">Back To API Console</button>
+          <button class="nav-btn" id="openSearchPageBtn" type="button">Search Events</button>
+          <button class="nav-btn active" type="button">Event Page Mock</button>
+        </div>
+      </div>
+    </nav>
+
+    <main class="main-container">
+      <section class="content-section mountain-section">
+        <h2 class="section-title">Event Page Preview</h2>
+        <p class="api-intro">Load an event by ID to preview what a single-event page could look like.</p>
+
+        <div class="event-preview-layout">
+          <div class="ticket-card api-panel">
+            <h3 class="chart-title">Load Event</h3>
+            <div class="config-row">
+              <div>
+                <label class="api-label" for="eventIdInput">Event ID</label>
+                <input class="input-field" id="eventIdInput" type="text" placeholder="event UUID">
+              </div>
+            </div>
+            <div class="form-actions">
+              <button id="loadBtn" class="btn-primary" type="button">Load Event</button>
+            </div>
+            <div id="status" class="response-meta info">Enter an event ID and click Load Event.</div>
+          </div>
+
+          <article id="eventCard" class="ticket-card hidden">
+            <img id="heroImage" class="event-hero" alt="Event image">
+            <h3 id="eventTitle" class="event-title-lg">Untitled Event</h3>
+
+            <div class="event-meta-grid">
+              <div class="event-meta-card">
+                <div class="event-meta-label">Start</div>
+                <div id="eventStart">-</div>
+              </div>
+              <div class="event-meta-card">
+                <div class="event-meta-label">End</div>
+                <div id="eventEnd">-</div>
+              </div>
+              <div class="event-meta-card">
+                <div class="event-meta-label">Location</div>
+                <div id="eventLocation">Location TBD</div>
+              </div>
+                <div class="event-meta-card">
+                  <div class="event-meta-label">Pricing</div>
+                  <div id="eventPrice">Free</div>
+                </div>
+            </div>
+
+            <h3 class="chart-title">Description</h3>
+            <p id="eventDescription" class="event-description">No description provided.</p>
+
+            <h3 class="chart-title">Categories</h3>
+            <div id="eventCategories" class="chip-row"></div>
+
+            <h3 class="chart-title">Documents</h3>
+            <ul id="eventDocuments" class="docs-list"></ul>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p class="footer-text">2026 Radford University</p>
+      <p class="footer-subtext">CS472 API Validation Workspace</p>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      var API_BASE = "https://service.example.invalid/production/Group-2";
+      var GET_EVENT_BY_ID_PATH = "{id}";
+      var GET_EVENT_IMAGE_METADATA_PATH = "/events/{eventId}/images";
+      var DOC_DOWNLOAD_PATH_CANDIDATES = [
+        "/events/{eventId}/documents/{docKey}/download",
+        "/events/{eventId}/documents/{docKey}"
+      ];
+      var state = { currentEventId: "" };
+
+      var refs = {
+        input: document.getElementById("eventIdInput"),
+        loadBtn: document.getElementById("loadBtn"),
+        backToConsoleBtn: document.getElementById("backToConsoleBtn"),
+        openSearchPageBtn: document.getElementById("openSearchPageBtn"),
+        status: document.getElementById("status"),
+        card: document.getElementById("eventCard"),
+        hero: document.getElementById("heroImage"),
+        title: document.getElementById("eventTitle"),
+        start: document.getElementById("eventStart"),
+        end: document.getElementById("eventEnd"),
+        location: document.getElementById("eventLocation"),
+        price: document.getElementById("eventPrice"),
+        description: document.getElementById("eventDescription"),
+        categories: document.getElementById("eventCategories"),
+        documents: document.getElementById("eventDocuments")
+      };
+
+      function normalizeBaseUrl(url) {
+        return String(url || "").trim().replace(/\/+$/, "");
+      }
+
+      function encodePathSegments(path) {
+        return String(path || "")
+          .split("/")
+          .map(function (segment) { return encodeURIComponent(segment); })
+          .join("/");
+      }
+
+      function uniqueStrings(values) {
+        var seen = {};
+        return values.filter(function (value) {
+          var key = String(value || "").trim();
+          if (!key || seen[key]) {
+            return false;
+          }
+          seen[key] = true;
+          return true;
+        });
+      }
+
+      function extractAssetPath(value) {
+        if (typeof value === "string") {
+          return value;
+        }
+        if (!value || typeof value !== "object") {
+          return "";
+        }
+        return readText(
+          value.url ||
+          value.href ||
+          value.path ||
+          value.key ||
+          value.s3Key ||
+          value.location ||
+          "",
+          ""
+        );
+      }
+
+      function extractAssetLabel(value, fallback) {
+        if (!value || typeof value !== "object") {
+          return fallback;
+        }
+        return readText(value.name || value.fileName || value.title || "", fallback);
+      }
+
+      function deriveAssetBases(eventData) {
+        var bases = [];
+        var urlFields = [
+          "asset_base_url",
+          "assets_base_url",
+          "base_url",
+          "cdn_url",
+          "cdn_base_url",
+          "files_base_url",
+          "file_base_url",
+          "image_base_url",
+          "images_base_url",
+          "document_base_url",
+          "documents_base_url"
+        ];
+        urlFields.forEach(function (field) {
+          var value = readText(eventData[field], "");
+          if (/^https?:\/\//i.test(value)) {
+            bases.push(normalizeBaseUrl(value));
+          }
+        });
+
+        var bucketFields = [
+          "bucket",
+          "bucket_name",
+          "s3_bucket",
+          "assets_bucket",
+          "images_bucket",
+          "documents_bucket"
+        ];
+        bucketFields.forEach(function (field) {
+          var bucket = readText(eventData[field], "");
+          if (bucket && bucket.indexOf("/") === -1) {
+            bases.push("https://" + bucket + ".s3.amazonaws.com");
+          }
+        });
+
+        return uniqueStrings(bases);
+      }
+
+      function resolveAssetUrl(rawValue, assetBases) {
+        var value = extractAssetPath(rawValue);
+        if (!value) {
+          return "";
+        }
+        if (/^https?:\/\//i.test(value)) {
+          return value;
+        }
+        if (/^s3:\/\//i.test(value)) {
+          var s3Parts = value.replace(/^s3:\/\//i, "").split("/");
+          var bucket = s3Parts.shift();
+          var s3Key = s3Parts.join("/");
+          return "https://" + bucket + ".s3.amazonaws.com/" + encodePathSegments(s3Key);
+        }
+
+        var bases = Array.isArray(assetBases) ? assetBases : [];
+        if (bases.length > 0) {
+          var cleanBase = normalizeBaseUrl(bases[0]);
+          if (value.charAt(0) === "/") {
+            return cleanBase + value;
+          }
+          return cleanBase + "/" + encodePathSegments(value);
+        }
+
+        // Last-resort attempt for same-origin static delivery.
+        if (/^events\//i.test(value)) {
+          return "/" + encodePathSegments(value);
+        }
+
+        return "";
+      }
+
+      function buildRouteUrl(path, params) {
+        var replaced = String(path || "");
+        Object.keys(params || {}).forEach(function (key) {
+          var value = params[key];
+          replaced = replaced.replace(new RegExp("\\{" + key + "\\}", "g"), encodeURIComponent(value || ""));
+        });
+        return replaced;
+      }
+
+      function buildUrl(path, eventId) {
+        var replaced = buildRouteUrl(String(path || ""), { id: eventId, eventId: eventId });
+        if (/^https?:\/\//i.test(replaced)) {
+          return replaced;
+        }
+        return normalizeBaseUrl(API_BASE) + "/" + replaced.replace(/^\/+/, "");
+      }
+
+      function safeJsonParse(text) {
+        try {
+          return JSON.parse(text);
+        } catch (error) {
+          return null;
+        }
+      }
+
+      function readText(value, fallback) {
+        var text = value == null ? "" : String(value).trim();
+        return text || fallback;
+      }
+
+        function parseDate(value) {
+          if (!value) {
+            return "-";
+          }
+          var date = new Date(value);
+        if (Number.isNaN(date.getTime())) {
+          return String(value);
+          }
+          return date.toLocaleString();
+        }
+
+        function formatMoney(value) {
+          if (typeof value === "number") {
+            return value <= 0 ? "Free" : "$" + value.toFixed(2);
+          }
+
+          var text = readText(value, "");
+          if (!text) {
+            return "";
+          }
+
+          var numeric = Number(text);
+          if (Number.isFinite(numeric)) {
+            return numeric <= 0 ? "Free" : "$" + numeric.toFixed(2);
+          }
+
+          return text;
+        }
+
+        function formatTicketPricing(eventData) {
+          var parts = [];
+          var budget = formatMoney(eventData.budget_price);
+          var standard = formatMoney(eventData.standard_price);
+          var vip = formatMoney(eventData.vip_price);
+
+          if (budget) {
+            parts.push("Budget " + budget);
+          }
+          if (standard) {
+            parts.push("Standard " + standard);
+          }
+          if (vip) {
+            parts.push("VIP " + vip);
+          }
+
+          if (parts.length > 0) {
+            return parts.join(" | ");
+          }
+
+          return formatMoney(eventData.price) || "Free";
+        }
+
+      function toList(value) {
+        if (Array.isArray(value)) {
+          return value;
+        }
+        if (typeof value === "string") {
+          return value.split(",").map(function (item) { return item.trim(); }).filter(Boolean);
+        }
+        return [];
+      }
+
+      function pickData(payload) {
+        if (!payload || typeof payload !== "object") {
+          return {};
+        }
+        return payload.item || payload.event || payload.data || payload;
+      }
+
+      function pickEventId(eventData) {
+        return readText(
+          eventData.event_id ||
+          eventData.id ||
+          eventData.eventId ||
+          eventData.pk ||
+          refs.input.value,
+          ""
+        );
+      }
+
+      function pickHero(eventData, assetBases) {
+        var images = toList(eventData.images || eventData.image_urls || eventData.photos);
+        for (var i = 0; i < images.length; i += 1) {
+          var resolved = resolveAssetUrl(images[i], assetBases);
+          if (resolved) {
+            return resolved;
+          }
+        }
+        var hero = resolveAssetUrl(eventData.hero_image, assetBases);
+        if (hero) {
+          return hero;
+        }
+        return "";
+      }
+
+      function setHeroSource(heroUrl, altText) {
+        refs.hero.alt = altText;
+        if (heroUrl) {
+          refs.hero.src = heroUrl;
+          refs.hero.classList.remove("hidden");
+        } else {
+          refs.hero.removeAttribute("src");
+          refs.hero.classList.add("hidden");
+        }
+      }
+
+      function setStatus(message, type) {
+        var statusType = type || "info";
+        refs.status.className = "response-meta " + statusType;
+        refs.status.textContent = message;
+      }
+
+      function hasSignedUrl(url) {
+        return /[?&]x-amz-signature=/i.test(String(url || ""));
+      }
+
+      function isLikelyPrivateS3Url(url) {
+        return /amazonaws\.com/i.test(String(url || "")) && !hasSignedUrl(url);
+      }
+
+      function extractS3KeyFromUrl(url) {
+        try {
+          var parsed = new URL(url);
+          var path = parsed.pathname.replace(/^\/+/, "");
+          if (/\.s3[.-]/i.test(parsed.hostname) || /\.s3\.amazonaws\.com$/i.test(parsed.hostname)) {
+            return decodeURIComponent(path);
+          }
+          if (/s3[.-].*amazonaws\.com$/i.test(parsed.hostname)) {
+            var firstSlash = path.indexOf("/");
+            return firstSlash >= 0 ? decodeURIComponent(path.slice(firstSlash + 1)) : "";
+          }
+          return "";
+        } catch (error) {
+          return "";
+        }
+      }
+
+      function uniqueNonEmpty(values) {
+        var seen = {};
+        var result = [];
+        values.forEach(function (value) {
+          var key = readText(value, "");
+          if (!key || seen[key]) {
+            return;
+          }
+          seen[key] = true;
+          result.push(key);
+        });
+        return result;
+      }
+
+      function extractDocumentTail(doc, eventId) {
+        var path = extractAssetPath(doc);
+        if (!path) {
+          return "";
+        }
+
+        // Normalize full URLs/s3 URLs to a key-like path first.
+        if (/^https?:\/\//i.test(path)) {
+          path = extractS3KeyFromUrl(path) || path;
+        } else if (/^s3:\/\//i.test(path)) {
+          var s3Parts = path.replace(/^s3:\/\//i, "").split("/");
+          s3Parts.shift();
+          path = s3Parts.join("/");
+        }
+
+        var expectedPrefix = "events/" + eventId + "/documents/";
+        if (path.indexOf(expectedPrefix) === 0) {
+          return path.slice(expectedPrefix.length);
+        }
+
+        var docsMarker = "/documents/";
+        var markerIndex = path.indexOf(docsMarker);
+        if (markerIndex >= 0) {
+          return path.slice(markerIndex + docsMarker.length);
+        }
+
+        var slashIndex = path.lastIndexOf("/");
+        return slashIndex >= 0 ? path.slice(slashIndex + 1) : path;
+      }
+
+      function pickDownloadUrl(data) {
+        if (!data) {
+          return "";
+        }
+        if (typeof data === "string" && /^https?:\/\//i.test(data)) {
+          return data;
+        }
+        if (typeof data !== "object") {
+          return "";
+        }
+        var candidates = [
+          data.url,
+          data.downloadUrl,
+          data.presignedUrl,
+          data.presignUrl,
+          data.fileUrl,
+          data.href,
+          data.data && data.data.url,
+          data.result && data.result.url
+        ];
+        for (var i = 0; i < candidates.length; i += 1) {
+          var candidate = readText(candidates[i], "");
+          if (/^https?:\/\//i.test(candidate)) {
+            return candidate;
+          }
+        }
+        return "";
+      }
+
+      function shouldHydrateHero(heroUrl) {
+        return !heroUrl || !/^https?:\/\//i.test(heroUrl) || isLikelyPrivateS3Url(heroUrl);
+      }
+
+      function pickMetadataHeroUrl(data) {
+        if (!data || typeof data !== "object") {
+          return "";
+        }
+        return readText(
+          data.heroImageUrl ||
+          data.hero_image_url ||
+          data.imageUrl ||
+          data.image_url ||
+          data.url,
+          ""
+        );
+      }
+
+      async function requestImageMetadata(eventId) {
+        var url = buildUrl(GET_EVENT_IMAGE_METADATA_PATH, eventId);
+        var response = await fetch(url, { method: "GET" });
+        if (response.status === 204) {
+          return null;
+        }
+
+        var text = await response.text();
+        var payload = safeJsonParse(text);
+        if (!response.ok || !payload || typeof payload !== "object") {
+          return null;
+        }
+
+        return payload;
+      }
+
+      async function hydrateHeroImage(eventData, currentHeroUrl) {
+        if (!shouldHydrateHero(currentHeroUrl)) {
+          return;
+        }
+
+        var eventId = state.currentEventId || pickEventId(eventData);
+        if (!eventId) {
+          return;
+        }
+
+        try {
+          var metadata = await requestImageMetadata(eventId);
+          var metadataHeroUrl = pickMetadataHeroUrl(metadata);
+          if (metadataHeroUrl) {
+            setHeroSource(metadataHeroUrl, readText(eventData.event_name, "Event image"));
+          }
+        } catch (error) {
+          // Keep the best available hero from the event payload when metadata lookup fails.
+        }
+      }
+
+      function inferFileName(doc, fallbackUrl) {
+        var label = extractAssetLabel(doc, "");
+        if (label) {
+          return label;
+        }
+
+        var path = extractAssetPath(doc);
+        if (path) {
+          var slash = path.lastIndexOf("/");
+          return slash >= 0 ? path.slice(slash + 1) : path;
+        }
+
+        try {
+          var parsed = new URL(String(fallbackUrl || ""));
+          var urlPath = parsed.pathname || "";
+          var urlSlash = urlPath.lastIndexOf("/");
+          var name = urlSlash >= 0 ? urlPath.slice(urlSlash + 1) : urlPath;
+          return decodeURIComponent(name || "download");
+        } catch (error) {
+          return "download";
+        }
+      }
+
+      async function forceDownload(url, fileName) {
+        var response = await fetch(url, { method: "GET" });
+        if (!response.ok) {
+          throw new Error("Download request failed (" + response.status + ").");
+        }
+        var blob = await response.blob();
+        var objectUrl = URL.createObjectURL(blob);
+
+        try {
+          var link = document.createElement("a");
+          link.href = objectUrl;
+          link.download = readText(fileName, "download");
+          link.rel = "noopener";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        } finally {
+          setTimeout(function () { URL.revokeObjectURL(objectUrl); }, 5000);
+        }
+      }
+
+      async function requestDocumentDownloadUrl(eventId, doc) {
+        var tail = extractDocumentTail(doc, eventId);
+        if (!tail) {
+          throw new Error("No document key available.");
+        }
+
+        for (var i = 0; i < DOC_DOWNLOAD_PATH_CANDIDATES.length; i += 1) {
+          var route = DOC_DOWNLOAD_PATH_CANDIDATES[i];
+          var path = buildRouteUrl(route, { eventId: eventId, docKey: tail });
+          var url = buildUrl(path, eventId);
+
+          var response = await fetch(url, { method: "GET" });
+          var text = await response.text();
+          var data = safeJsonParse(text);
+          if (!response.ok) {
+            continue;
+          }
+          var downloadUrl = pickDownloadUrl(data);
+          if (downloadUrl) {
+            return downloadUrl;
+          }
+        }
+
+        throw new Error("No signed document URL was returned by the API.");
+      }
+
+      async function downloadDocument(doc) {
+        var directUrl = resolveAssetUrl(doc, []);
+        var fileName = inferFileName(doc, directUrl);
+        if (/^https?:\/\//i.test(directUrl) && !isLikelyPrivateS3Url(directUrl)) {
+          await forceDownload(directUrl, fileName);
+          setStatus("Download started.", "success");
+          return;
+        }
+
+        if (!state.currentEventId) {
+          setStatus("Document is private and event id is missing.", "error");
+          return;
+        }
+
+        setStatus("Requesting secure document link...", "info");
+        try {
+          var signedUrl = await requestDocumentDownloadUrl(state.currentEventId, doc);
+          await forceDownload(signedUrl, fileName);
+          setStatus("Secure download started.", "success");
+        } catch (error) {
+          setStatus("Could not download document. Ensure backend returns a signed URL and CORS allows file fetch.", "error");
+        }
+      }
+
+      function render(eventData) {
+        var assetBases = deriveAssetBases(eventData);
+        state.currentEventId = pickEventId(eventData);
+        refs.card.classList.remove("hidden");
+
+        var heroUrl = pickHero(eventData, assetBases);
+        setHeroSource(heroUrl, readText(eventData.event_name, "Event image"));
+        refs.title.textContent = readText(eventData.event_name, "Untitled Event");
+        refs.start.textContent = parseDate(eventData.date_time || eventData.start_date_time || eventData.start_time);
+        refs.end.textContent = parseDate(eventData.end_date_time || eventData.end_time);
+        refs.location.textContent = readText(eventData.location, "Location TBD");
+        refs.price.textContent = formatTicketPricing(eventData);
+        refs.description.textContent = readText(eventData.description, "No description provided.");
+
+        var categories = toList(eventData.categories);
+        refs.categories.innerHTML = "";
+        if (categories.length === 0) {
+          var defaultChip = document.createElement("span");
+          defaultChip.className = "event-chip";
+          defaultChip.textContent = "General";
+          refs.categories.appendChild(defaultChip);
+        } else {
+          categories.forEach(function (cat) {
+            var chip = document.createElement("span");
+            chip.className = "event-chip";
+            chip.textContent = cat;
+            refs.categories.appendChild(chip);
+          });
+        }
+
+        var documents = toList(eventData.documents || eventData.docs || eventData.attachments);
+        refs.documents.innerHTML = "";
+        if (documents.length === 0) {
+          var empty = document.createElement("li");
+          empty.textContent = "No documents attached.";
+          refs.documents.appendChild(empty);
+        } else {
+          documents.forEach(function (doc) {
+            var li = document.createElement("li");
+            var docPath = extractAssetPath(doc);
+            var docUrl = resolveAssetUrl(doc, assetBases);
+            var label = extractAssetLabel(doc, readText(docPath, "document"));
+            var canLink = !!docUrl;
+            if (canLink) {
+              var link = document.createElement("a");
+              link.href = "#";
+              link.addEventListener("click", function (event) {
+                event.preventDefault();
+                downloadDocument(doc);
+              });
+              link.textContent = label;
+              li.appendChild(link);
+            } else {
+              var privateLink = document.createElement("a");
+              privateLink.href = "#";
+              privateLink.textContent = label;
+              privateLink.addEventListener("click", function (event) {
+                event.preventDefault();
+                downloadDocument(doc);
+              });
+              li.appendChild(privateLink);
+            }
+            refs.documents.appendChild(li);
+          });
+        }
+
+        return heroUrl;
+      }
+
+      async function loadEventById(eventId) {
+        var id = readText(eventId, "");
+        if (!id) {
+          setStatus("Please enter an event ID.", "error");
+          refs.card.classList.add("hidden");
+          return;
+        }
+
+        setStatus("Loading event " + id + "...", "info");
+
+        var url = buildUrl(GET_EVENT_BY_ID_PATH, id);
+        try {
+          var response = await fetch(url, { method: "GET" });
+          var text = await response.text();
+          var payload;
+
+          try {
+            payload = JSON.parse(text);
+          } catch (error) {
+            throw new Error("API returned a non-JSON response.");
+          }
+
+          if (!response.ok) {
+            var apiMessage = payload && payload.message ? String(payload.message) : "Request failed";
+            throw new Error(apiMessage + " (" + response.status + ")");
+          }
+
+          var eventData = pickData(payload);
+          var heroUrl = render(eventData);
+          await hydrateHeroImage(eventData, heroUrl);
+          setStatus("Loaded event " + id + ".", "success");
+        } catch (error) {
+          refs.card.classList.add("hidden");
+          setStatus("Unable to load event: " + error.message, "error");
+        }
+      }
+
+      refs.loadBtn.addEventListener("click", function () {
+        loadEventById(refs.input.value);
+      });
+
+      refs.input.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          loadEventById(refs.input.value);
+        }
+      });
+
+      refs.backToConsoleBtn.addEventListener("click", function () {
+        window.location.href = "index.html";
+      });
+
+      refs.openSearchPageBtn.addEventListener("click", function () {
+        window.location.href = "search.html";
+      });
+
+      var queryId = new URLSearchParams(window.location.search).get("id");
+      if (queryId) {
+        refs.input.value = queryId;
+        loadEventById(queryId);
+      }
+    }());
+  </script>
+</body>
+</html>

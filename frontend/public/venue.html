@@ -1,0 +1,459 @@
+<!doctype html>
+<!--
+  venue.html — Radford Events Ticketing: Interactive Seat Map
+  ============================================================
+  This page renders the seat-selection UI for a single event.
+  It must be opened with an event_id query parameter, e.g.:
+    venue.html?event_id=demo-event-001&event_name=Taylor%20Swift
+
+  All interactivity (seat clicks, API calls, cart persistence) is
+  handled by venue-app.js, which is loaded at the bottom of <body>.
+  Styles come from venue-styles.css.
+
+  Navigation flow:
+    index.html  →  "View Event" button  →  venue.html  →  "Add to Cart"
+    →  localStorage("radford_cart")  →  back to index.html cart view
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Muse Banquet Hall - Venue Layouts</title>
+    <link rel="stylesheet" href="/venue-styles.css" />
+    <!--
+      Inline loader styles — kept in <head> (not in venue-styles.css) so the
+      overlay paints on the very first frame, before the external stylesheet
+      has loaded. Without this, users briefly see the static seat map stages
+      and placeholder event title before venue-app.js finishes fetching data.
+      venue-app.js removes #venue-loader once initial render (or error) is done.
+    -->
+    <style>
+      #venue-loader {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        background: #ffffff;
+        font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        color: #6b7280;
+        transition: opacity 0.25s ease;
+      }
+      #venue-loader.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+      #venue-loader .venue-loader-spinner {
+        width: 44px;
+        height: 44px;
+        border: 4px solid #e5e7eb;
+        border-top-color: #b11226;
+        border-radius: 50%;
+        animation: venue-loader-spin 0.9s linear infinite;
+      }
+      #venue-loader .venue-loader-text {
+        font-size: 0.95rem;
+        font-weight: 500;
+        letter-spacing: 0.01em;
+      }
+      @keyframes venue-loader-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Full-screen loading overlay. Covers the page until venue-app.js
+         finishes its initial data fetch + seat-map render, then fades out.
+         Kept as a direct child of <body> so it overlays header, nav, and main. -->
+    <div id="venue-loader" role="status" aria-live="polite">
+      <div class="venue-loader-spinner" aria-hidden="true"></div>
+      <div class="venue-loader-text">Loading event…</div>
+    </div>
+    <div id="app" class="app">
+      <!-- ============================================================
+             SITE HEADER
+             Displays the Radford "R" logo, app title, and the logged-in
+             user's email. The user-status span is static here; index.html
+             manages real auth state via React.
+             ============================================================ -->
+      <header class="app-header">
+        <div class="header-inner">
+          <div class="header-logo">
+            <svg
+              width="48"
+              height="48"
+              viewBox="0 0 48 48"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="24"
+                cy="24"
+                r="22"
+                fill="white"
+                stroke="#b11226"
+                stroke-width="2"
+              />
+              <text
+                x="24"
+                y="30"
+                font-size="20"
+                font-weight="bold"
+                fill="#b11226"
+                text-anchor="middle"
+                font-family="serif"
+              >
+                R
+              </text>
+            </svg>
+          </div>
+          <h1 class="header-title">Radford Events Ticketing</h1>
+          <div class="header-actions">
+            <!-- Shown when logged out -->
+            <span
+              class="user-status"
+              id="user-status-guest"
+              style="display: none"
+              >Not logged in</span
+            >
+            <!-- Avatar + dropdown — shown when logged in -->
+            <div class="header-user" id="header-user" style="display: none">
+              <button
+                class="header-avatar"
+                id="header-avatar-btn"
+                aria-label="User menu"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+              </button>
+              <div
+                class="header-dropdown"
+                id="header-dropdown"
+                style="display: none"
+              >
+                <div
+                  class="header-dropdown-email"
+                  id="header-dropdown-email"
+                ></div>
+                <a
+                  href="/profile"
+                  class="header-dropdown-profile-link"
+                  id="header-profile-link"
+                >
+                  <svg
+                    width="15"
+                    height="15"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                  View Profile
+                </a>
+                <button class="header-dropdown-logout" id="header-logout-btn">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                  </svg>
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- ============================================================
+             NAVIGATION BAR
+             Links back to the React app for Browse, Cart, and My Tickets.
+             The Cart count "(0)" is a placeholder — venue-app.js updates
+             it dynamically via updateNavCartCount() on page load and on
+             every seat click.
+             ============================================================ -->
+      <nav class="navbar">
+        <div class="nav-container">
+          <div class="nav-buttons">
+            <button class="nav-btn" onclick="window.location.href = '/'">
+              🏆 Browse Events
+            </button>
+            <button
+              class="nav-btn"
+              id="nav-cart-btn"
+              onclick="window.location.href = '/cart'"
+            >
+              🛒 Cart (0)
+            </button>
+            <button
+              class="nav-btn"
+              onclick="window.location.href = '/mytickets'"
+            >
+              🎫 My Tickets
+            </button>
+            <button
+              class="nav-btn"
+              onclick="window.location.href = '/transactionhistory'"
+            >
+              🧾 Transaction History
+            </button>
+            <button
+              class="nav-btn"
+              id="nav-login-btn"
+              onclick="window.location.href = '/login'"
+              style="display: none"
+            >
+              🔐 Login
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <main class="main-container venue-main">
+        <div class="content-section interactive-venue-section">
+          <div class="header-controls">
+            <div class="venue-info-header">
+              <div class="venue-info-text">
+                <!-- Populated by venue-app.js → updateEventHeader() once
+                                 event metadata arrives. Left blank so no placeholder
+                                 event name flashes if the loading overlay is bypassed. -->
+                <h2 class="section-title"></h2>
+                <p class="venue-subtitle"></p>
+              </div>
+              <button
+                class="btn-subscribe"
+                id="btn-subscribe"
+                title="Subscribe to event notifications"
+              >
+                🔔 <span class="btn-subscribe-label">Get Notified</span>
+              </button>
+            </div>
+
+            <!-- Layout tab buttons — hidden from users, controlled programmatically by venue-app.js -->
+            <div
+              class="layout-selector category-selector"
+              style="display: none"
+            >
+              <button
+                class="category-btn active"
+                onclick="showLayout('classroom', this)"
+              >
+                Classroom Style
+              </button>
+              <button
+                class="category-btn"
+                onclick="showLayout('theater', this)"
+              >
+                Theater Style
+              </button>
+              <button
+                class="category-btn"
+                onclick="showLayout('banquet', this)"
+              >
+                Banquet Style
+              </button>
+            </div>
+          </div>
+
+          <!-- Unified seat map card: legend bar on top, dotted canvas below -->
+          <div class="venue-map-card">
+            <div class="seat-legend">
+              <div class="legend-group">
+                <span class="legend-label">Tiers</span>
+                <div class="legend-items">
+                  <div class="legend-item">
+                    <div class="seat-sample vip-sample"></div>
+                    VIP
+                  </div>
+                  <div class="legend-item">
+                    <div class="seat-sample standard-sample"></div>
+                    Standard
+                  </div>
+                  <div class="legend-item">
+                    <div class="seat-sample budget-sample"></div>
+                    Budget
+                  </div>
+                </div>
+              </div>
+              <div class="legend-divider"></div>
+              <div class="legend-group">
+                <span class="legend-label">Status</span>
+                <div class="legend-items">
+                  <div class="legend-item">
+                    <div class="seat-sample selected-sample"></div>
+                    Selected
+                  </div>
+                  <div class="legend-item">
+                    <div class="seat-sample unavailable-sample"></div>
+                    Unavailable
+                  </div>
+                  <div class="legend-item" id="legend-accessible">
+                    <div class="seat-sample accessible-sample"></div>
+                    Accessible
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ============================================================
+                     SEAT MAP CONTAINERS
+                     One <div class="venue-container"> per supported layout.
+                     All containers are always present in the DOM; visibility is
+                     controlled by the `.active` class (see venue-app.js →
+                     showLayout / lockLayoutSelector). The matching seating-area
+                     <div> is the mount point that the corresponding generator
+                     in venue-app.js fills with seats at render time:
+
+                       #classroom-seating → generateClassroom()
+                       #theater-seating   → generateTheater()
+                       #banquet-seating   → generateBanquet()
+                       #bonnie-seating    → generateBonnie()   (Bonnie Auditorium)
+
+                     Adding a new layout requires (1) a container block here,
+                     (2) a generator function in venue-app.js, (3) a dispatch
+                     entry in the layout render switch, and (4) a VENUE_STYLE_MAP
+                     entry keyed by "{venue_name}-{layout_name}".
+                     ============================================================ -->
+            <div class="venue-interactive-wrapper">
+              <div id="classroom" class="venue-container active">
+                <div class="stage">
+                  <h3>STAGE</h3>
+                  <span>Presentation Area</span>
+                </div>
+                <div class="seating-area" id="classroom-seating"></div>
+              </div>
+
+              <div id="theater" class="venue-container">
+                <div class="stage">
+                  <h3>STAGE</h3>
+                  <span>Presentation Area</span>
+                </div>
+                <div class="seating-area" id="theater-seating"></div>
+              </div>
+
+              <div id="banquet" class="venue-container">
+                <div class="stage">
+                  <h3>STAGE</h3>
+                  <span>Presentation Area</span>
+                </div>
+                <div class="seating-area" id="banquet-seating"></div>
+              </div>
+
+              <!-- Bonnie Auditorium · "All Section" layout
+                         200 fixed seats arranged as 10 rows (A–J) × 20 seats per row.
+                         Each row is split into three groups by aisles: left (5) +
+                         center (10) + right (5). Backend (team03-create-tickets)
+                         seeds tiers as A–B VIP, C–H Standard, I–J Budget; tier
+                         coloring and disability badges are applied per seat at
+                         render time. -->
+              <div id="bonnie" class="venue-container">
+                <div class="stage">
+                  <h3>STAGE</h3>
+                  <span>Presentation Area</span>
+                </div>
+                <div class="seating-area" id="bonnie-seating"></div>
+              </div>
+
+              <!-- Dedmon Center · "All Section" layout (General Admission)
+                         16 sections (A–P) arranged clockwise around a central basketball court.
+                         Users select a quantity of GA tickets from each section.
+                         Backend marks the first 5% of tickets in each section with disability: true.
+                         The grid lives inside .dedmon-scroll-wrap so only the grid scrolls
+                         horizontally on narrow screens — the shared editor panel (inserted by
+                         ensureDedmonEditor in venue-app.js) stays pinned to the viewport width. -->
+              <div id="dedmon" class="venue-container">
+                <div class="dedmon-scroll-wrap">
+                  <div
+                    class="seating-area dedmon-court-grid"
+                    id="dedmon-seating"
+                  ></div>
+                </div>
+              </div>
+
+              <!-- Dedmon Center · "Graduation" layout (General Admission, ceremony-style)
+                         Reuses the Dedmon "All Section" 16-section grid exactly — the only
+                         differences are applied at render time in generateGraduation():
+                           • Center court is labeled "STUDENT SECTION" instead of "BASKETBALL COURT".
+                           • A, E, F, H, I, J, K, L, M, N, P are forced into an "unavailable" state
+                             that uses the legend's Unavailable swatch color.
+                           • Tier overrides: A/B/C → Standard, D/E → VIP.
+                         Reuses the shared GA editor panel from venue-app.js. -->
+              <div id="graduation" class="venue-container">
+                <div class="dedmon-scroll-wrap">
+                  <div
+                    class="seating-area dedmon-court-grid"
+                    id="graduation-seating"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- /.venue-map-card -->
+        </div>
+
+        <!-- ============================================================
+                 STICKY CHECKOUT BAR
+                 Sticks to the bottom of the screen. All three spans and the
+                 button are updated by venue-app.js via updateCheckoutUI():
+                   #ticket-count  — "N Ticket(s) Selected"
+                   #ticket-price  — per-ticket price (with SALE badge if discounted)
+                   #ticket-total  — running total in dollars
+                   #btn-checkout  — disabled until at least 1 seat is selected;
+                                    clicking it calls handleAddToCart()
+                 ============================================================ -->
+        <div class="sticky-checkout-bar">
+          <div class="checkout-info">
+            <span class="ticket-count" id="ticket-count"
+              >0 Tickets Selected</span
+            >
+            <span class="ticket-price" id="ticket-price"></span>
+            <span class="ticket-total" id="ticket-total">Total: $0.00</span>
+          </div>
+          <button class="btn-primary btn-checkout" id="btn-checkout" disabled>
+            Add to Cart
+          </button>
+        </div>
+      </main>
+
+      <footer class="footer">
+        <p class="footer-text">&copy; 2026 Radford University</p>
+        <p class="footer-subtext">CS472 Go Highlanders!</p>
+      </footer>
+    </div>
+
+    <!-- Entry point: venue-app.js reads event_id from the URL, fetches
+         data from the API, builds the seat maps, and wires up all interactivity.
+         Must be loaded at the end of <body> so the DOM elements above exist. -->
+    <script src="/venue-app.js"></script>
+  </body>
+</html>

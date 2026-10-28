@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Radford Event Search</title>
+  <link rel="stylesheet" href="RadfordTicketing.css">
+  <style>
+    .search-layout {
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .search-results {
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .search-card {
+      border-left-color: var(--navy-accent);
+    }
+
+    .search-card-layout {
+      display: grid;
+      grid-template-columns: minmax(220px, 320px) 1fr;
+      gap: 1.25rem;
+      align-items: start;
+    }
+
+    .search-hero {
+      width: 100%;
+      min-height: 220px;
+      height: 100%;
+      object-fit: cover;
+      border-radius: var(--radius);
+      border: 1px solid var(--mountain-grey);
+      background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+    }
+
+    .search-card-content {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .search-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: start;
+      flex-wrap: wrap;
+    }
+
+    .search-title-wrap {
+      min-width: 220px;
+      flex: 1;
+    }
+
+    .search-title {
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: var(--black);
+      margin-bottom: 0.35rem;
+    }
+
+    .search-id {
+      color: var(--neutral-grey);
+      font-size: 0.9rem;
+      word-break: break-word;
+    }
+
+    .search-price {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--radford-red);
+      white-space: normal;
+      line-height: 1.35;
+      text-align: right;
+      max-width: 220px;
+    }
+
+    .search-price.free {
+      color: var(--success-green);
+    }
+
+    .search-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.8rem;
+    }
+
+    .search-meta-card {
+      border: 1px solid var(--mountain-grey);
+      border-radius: var(--radius);
+      padding: 0.75rem;
+      background: var(--light-grey);
+    }
+
+    .search-meta-label {
+      color: var(--neutral-grey);
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .search-description {
+      color: var(--black);
+      white-space: pre-wrap;
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .event-chip {
+      display: inline-block;
+      padding: 0.3rem 0.7rem;
+      border-radius: 999px;
+      background: #fee2e2;
+      color: #991b1b;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .search-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .results-toolbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .results-summary {
+      color: var(--neutral-grey);
+      font-size: 0.95rem;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .search-card-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .search-hero {
+        min-height: 200px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <div class="header-inner">
+        <div class="header-logo" aria-hidden="true">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="24" cy="24" r="22" fill="white" stroke="#b11226" stroke-width="2"></circle>
+            <text x="24" y="30" font-size="20" font-weight="bold" fill="#b11226" text-anchor="middle" font-family="serif">R</text>
+          </svg>
+        </div>
+        <h1 class="header-title">Radford Event Search</h1>
+        <div class="header-actions">
+          <span class="user-status">API-Powered Event Discovery</span>
+        </div>
+      </div>
+    </header>
+
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="nav-buttons">
+          <button class="nav-btn" id="backToConsoleBtn" type="button">Back To API Console</button>
+          <button class="nav-btn" id="openEventPageBtn" type="button">Event By ID Page</button>
+          <button class="nav-btn active" type="button">Search Events</button>
+        </div>
+      </div>
+    </nav>
+
+    <main class="main-container">
+      <section class="content-section mountain-section">
+        <h2 class="section-title">Event Search</h2>
+        <p class="api-intro">Search the production event API or leave the query blank to list upcoming, non-cancelled events.</p>
+
+        <div class="search-layout">
+          <div class="ticket-card api-panel">
+            <h3 class="chart-title">Search Filters</h3>
+            <form id="searchForm" class="api-form">
+              <div class="field-grid">
+                <div class="field-span-full">
+                  <label class="api-label" for="searchQuery">Search Query</label>
+                  <input class="input-field" id="searchQuery" type="text" placeholder="concert, speaker, basketball">
+                </div>
+                <div>
+                  <label class="api-label" for="searchLimit">Limit (optional)</label>
+                  <input class="input-field" id="searchLimit" type="number" min="1" max="100" placeholder="25">
+                </div>
+              </div>
+              <p class="config-help">Use <code>q</code> to run ranked search with <code>nextToken</code>. Leave it blank to call <code>GET /production/Group-2/events</code> with no search term and list upcoming events.</p>
+              <div class="form-actions">
+                <button class="btn-primary" type="submit">Search / List Events</button>
+                <button class="btn-accent" type="button" id="clearSearchBtn">Clear Results</button>
+              </div>
+            </form>
+            <div id="status" class="response-meta info">Enter a search term, or leave it blank to load upcoming events.</div>
+          </div>
+
+          <div class="ticket-card api-panel">
+            <div class="results-toolbar">
+              <h3 class="chart-title">Matching Events</h3>
+              <div id="resultsSummary" class="results-summary">No search has been run yet.</div>
+            </div>
+            <div id="emptyState" class="empty-state">
+              <p class="empty-message">Search results will appear here.</p>
+            </div>
+            <div id="results" class="search-results"></div>
+            <div class="form-actions">
+              <button class="btn-primary hidden" type="button" id="loadMoreBtn">Load More Results</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p class="footer-text">2026 Radford University</p>
+      <p class="footer-subtext">CS472 API Validation Workspace</p>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      var API_BASE = "https://service.example.invalid/production/Group-2";
+      var SEARCH_EVENTS_PATH = "/events";
+      var PLACEHOLDER_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 420'%3E%3Crect width='640' height='420' fill='%23e5e7eb'/%3E%3Cpath d='M70 320 L180 205 L265 280 L365 155 L570 320 Z' fill='%23cbd5e1'/%3E%3Ccircle cx='470' cy='120' r='34' fill='%23f8fafc'/%3E%3Ctext x='320' y='372' text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='28' fill='%236b7280'%3ERadford Event%3C/text%3E%3C/svg%3E";
+      var state = {
+        query: "",
+        limit: "",
+        nextToken: "",
+        renderedCount: 0
+      };
+
+      var refs = {
+        searchForm: document.getElementById("searchForm"),
+        searchQuery: document.getElementById("searchQuery"),
+        searchLimit: document.getElementById("searchLimit"),
+        clearSearchBtn: document.getElementById("clearSearchBtn"),
+        loadMoreBtn: document.getElementById("loadMoreBtn"),
+        backToConsoleBtn: document.getElementById("backToConsoleBtn"),
+        openEventPageBtn: document.getElementById("openEventPageBtn"),
+        status: document.getElementById("status"),
+        resultsSummary: document.getElementById("resultsSummary"),
+        emptyState: document.getElementById("emptyState"),
+        emptyMessage: document.querySelector("#emptyState .empty-message"),
+        results: document.getElementById("results")
+      };
+
+      function normalizeBaseUrl(url) {
+        return String(url || "").trim().replace(/\/+$/, "");
+      }
+
+      function appendQueryParams(url, params) {
+        var serialized = new URLSearchParams(params).toString();
+        if (!serialized) {
+          return url;
+        }
+        return url + (url.indexOf("?") === -1 ? "?" : "&") + serialized;
+      }
+
+      function buildUrl(path) {
+        var cleanBase = normalizeBaseUrl(API_BASE);
+        var cleanPath = String(path || "").trim().replace(/^\/+/, "");
+        return cleanBase + "/" + cleanPath;
+      }
+
+      function encodePathSegments(path) {
+        return String(path || "")
+          .split("/")
+          .map(function (segment) { return encodeURIComponent(segment); })
+          .join("/");
+      }
+
+      function safeJsonParse(text) {
+        try {
+          return JSON.parse(text);
+        } catch (error) {
+          return null;
+        }
+      }
+
+      function readText(value, fallback) {
+        var text = value == null ? "" : String(value).trim();
+        return text || fallback;
+      }
+
+      function uniqueStrings(values) {
+        var seen = {};
+        var result = [];
+        values.forEach(function (value) {
+          var key = readText(value, "");
+          if (!key || seen[key]) {
+            return;
+          }
+          seen[key] = true;
+          result.push(key);
+        });
+        return result;
+      }
+
+      function toList(value) {
+        if (Array.isArray(value)) {
+          return value;
+        }
+        if (typeof value === "string") {
+          return value.split(",").map(function (item) { return item.trim(); }).filter(Boolean);
+        }
+        return [];
+      }
+
+      function extractAssetPath(value) {
+        if (typeof value === "string") {
+          return value;
+        }
+        if (!value || typeof value !== "object") {
+          return "";
+        }
+        return readText(
+          value.url ||
+          value.href ||
+          value.path ||
+          value.key ||
+          value.s3Key ||
+          value.location ||
+          "",
+          ""
+        );
+      }
+
+      function deriveAssetBases(eventData) {
+        var bases = [];
+        var urlFields = [
+          "asset_base_url",
+          "assets_base_url",
+          "base_url",
+          "cdn_url",
+          "cdn_base_url",
+          "files_base_url",
+          "file_base_url",
+          "image_base_url",
+          "images_base_url"
+        ];
+
+        urlFields.forEach(function (field) {
+          var value = readText(eventData[field], "");
+          if (/^https?:\/\//i.test(value)) {
+            bases.push(normalizeBaseUrl(value));
+          }
+        });
+
+        var bucketFields = [
+          "bucket",
+          "bucket_name",
+          "s3_bucket",
+          "assets_bucket",
+          "images_bucket"
+        ];
+
+        bucketFields.forEach(function (field) {
+          var bucket = readText(eventData[field], "");
+          if (bucket && bucket.indexOf("/") === -1) {
+            bases.push("https://" + bucket + ".s3.amazonaws.com");
+          }
+        });
+
+        return uniqueStrings(bases);
+      }
+
+      function resolveAssetUrl(rawValue, assetBases) {
+        var value = extractAssetPath(rawValue);
+        if (!value) {
+          return "";
+        }
+        if (/^https?:\/\//i.test(value)) {
+          return value;
+        }
+        if (/^s3:\/\//i.test(value)) {
+          var s3Parts = value.replace(/^s3:\/\//i, "").split("/");
+          var bucket = s3Parts.shift();
+          var s3Key = s3Parts.join("/");
+          return "https://" + bucket + ".s3.amazonaws.com/" + encodePathSegments(s3Key);
+        }
+
+        var bases = Array.isArray(assetBases) ? assetBases : [];
+        if (bases.length > 0) {
+          var cleanBase = normalizeBaseUrl(bases[0]);
+          if (value.charAt(0) === "/") {
+            return cleanBase + value;
+          }
+          return cleanBase + "/" + encodePathSegments(value);
+        }
+
+        return "";
+      }
+
+      function parseDate(value) {
+        if (!value) {
+          return "-";
+        }
+        var date = new Date(value);
+        if (Number.isNaN(date.getTime())) {
+          return String(value);
+        }
+        return date.toLocaleString();
+      }
+
+      function parseLimit(rawValue) {
+        if (!rawValue) {
+          return "";
+        }
+        var parsed = Number.parseInt(rawValue, 10);
+        if (!Number.isInteger(parsed) || parsed < 1 || parsed > 100) {
+          return null;
+        }
+        return String(parsed);
+      }
+
+      function setStatus(message, type) {
+        refs.status.className = "response-meta " + (type || "info");
+        refs.status.textContent = message;
+      }
+
+      function setSummary(message) {
+        refs.resultsSummary.textContent = message;
+      }
+
+      function pickItems(payload) {
+        if (!payload) {
+          return [];
+        }
+        if (Array.isArray(payload)) {
+          return payload;
+        }
+        if (Array.isArray(payload.items)) {
+          return payload.items;
+        }
+        if (Array.isArray(payload.events)) {
+          return payload.events;
+        }
+        if (payload.data && Array.isArray(payload.data.items)) {
+          return payload.data.items;
+        }
+        return [];
+      }
+
+      function pickEventId(eventData) {
+        return readText(
+          eventData.event_id ||
+          eventData.id ||
+          eventData.eventId ||
+          eventData.pk,
+          ""
+        );
+      }
+
+      function pickHero(eventData) {
+        var assetBases = deriveAssetBases(eventData);
+        var images = toList(eventData.images || eventData.image_urls || eventData.photos);
+        for (var i = 0; i < images.length; i += 1) {
+          var resolved = resolveAssetUrl(images[i], assetBases);
+          if (resolved) {
+            return resolved;
+          }
+        }
+        var hero = resolveAssetUrl(eventData.hero_image, assetBases);
+        return hero || "";
+      }
+
+      function formatMoney(value) {
+        if (typeof value === "number") {
+          return value <= 0 ? "Free" : "$" + value.toFixed(2);
+        }
+        var text = readText(value, "");
+        if (!text) {
+          return "";
+        }
+        var numeric = Number(text);
+        if (Number.isFinite(numeric)) {
+          return numeric <= 0 ? "Free" : "$" + numeric.toFixed(2);
+        }
+        return text;
+      }
+
+      function formatPrice(eventData) {
+        var parts = [];
+        var budget = formatMoney(eventData.budget_price);
+        var standard = formatMoney(eventData.standard_price);
+        var vip = formatMoney(eventData.vip_price);
+
+        if (budget) {
+          parts.push("B " + budget);
+        }
+        if (standard) {
+          parts.push("S " + standard);
+        }
+        if (vip) {
+          parts.push("V " + vip);
+        }
+
+        if (parts.length > 0) {
+          return parts.join(" | ");
+        }
+
+        return formatMoney(eventData.price) || "Free";
+      }
+
+      function truncateText(value, maxLength) {
+        var text = readText(value, "");
+        if (!text) {
+          return "No description provided.";
+        }
+        if (text.length <= maxLength) {
+          return text;
+        }
+        return text.slice(0, Math.max(0, maxLength - 3)).trimEnd() + "...";
+      }
+
+      function updateHistory(query, limit) {
+        var params = new URLSearchParams();
+        if (query) {
+          params.set("q", query);
+        }
+        if (query && limit) {
+          params.set("limit", limit);
+        }
+        var nextUrl = "search.html" + (params.toString() ? "?" + params.toString() : "");
+        window.history.replaceState({}, "", nextUrl);
+      }
+
+      function clearResults(message) {
+        state.nextToken = "";
+        state.renderedCount = 0;
+        refs.results.innerHTML = "";
+        refs.loadMoreBtn.classList.add("hidden");
+        refs.emptyState.classList.remove("hidden");
+        refs.emptyMessage.textContent = "Search results will appear here.";
+        setSummary(message || "No search has been run yet.");
+      }
+
+      function createChip(text) {
+        var chip = document.createElement("span");
+        chip.className = "event-chip";
+        chip.textContent = text;
+        return chip;
+      }
+
+      function createMetaCard(label, value) {
+        var card = document.createElement("div");
+        card.className = "search-meta-card";
+
+        var heading = document.createElement("div");
+        heading.className = "search-meta-label";
+        heading.textContent = label;
+
+        var body = document.createElement("div");
+        body.textContent = value;
+
+        card.appendChild(heading);
+        card.appendChild(body);
+        return card;
+      }
+
+      function renderResultCard(eventData) {
+        var eventId = pickEventId(eventData);
+        var card = document.createElement("article");
+        card.className = "ticket-card search-card";
+
+        var layout = document.createElement("div");
+        layout.className = "search-card-layout";
+
+        var hero = document.createElement("img");
+        hero.className = "search-hero";
+        hero.alt = readText(eventData.event_name, "Event image");
+        var heroUrl = pickHero(eventData);
+        hero.src = heroUrl || PLACEHOLDER_IMAGE;
+
+        var content = document.createElement("div");
+        content.className = "search-card-content";
+
+        var header = document.createElement("div");
+        header.className = "search-header";
+
+        var titleWrap = document.createElement("div");
+        titleWrap.className = "search-title-wrap";
+
+        var title = document.createElement("h3");
+        title.className = "search-title";
+        title.textContent = readText(eventData.event_name, "Untitled Event");
+
+        var idLine = document.createElement("div");
+        idLine.className = "search-id";
+        idLine.textContent = eventId ? "Event ID: " + eventId : "Event ID unavailable";
+
+        titleWrap.appendChild(title);
+          titleWrap.appendChild(idLine);
+
+          var price = document.createElement("div");
+          price.className = "search-price";
+          price.textContent = formatPrice(eventData);
+          if (price.textContent === "Free") {
+            price.classList.add("free");
+          }
+
+        header.appendChild(titleWrap);
+        header.appendChild(price);
+
+        var metaGrid = document.createElement("div");
+        metaGrid.className = "search-meta-grid";
+        metaGrid.appendChild(createMetaCard("Start", parseDate(eventData.date_time || eventData.start_date_time || eventData.start_time)));
+        metaGrid.appendChild(createMetaCard("End", parseDate(eventData.end_date_time || eventData.end_time)));
+        metaGrid.appendChild(createMetaCard("Location", readText(eventData.location, "Location TBD")));
+        metaGrid.appendChild(createMetaCard("Seats", readText(eventData.seat_count, "Not provided")));
+
+        var description = document.createElement("p");
+        description.className = "search-description";
+        description.textContent = truncateText(eventData.description, 260);
+
+        var categoriesRow = document.createElement("div");
+        categoriesRow.className = "chip-row";
+        var categories = toList(eventData.categories);
+        if (categories.length === 0) {
+          categoriesRow.appendChild(createChip("General"));
+        } else {
+          categories.forEach(function (category) {
+            categoriesRow.appendChild(createChip(category));
+          });
+        }
+
+        var actions = document.createElement("div");
+        actions.className = "search-actions";
+
+        var viewButton = document.createElement("button");
+        viewButton.className = "btn-primary";
+        viewButton.type = "button";
+        viewButton.textContent = "View Event Page";
+        viewButton.disabled = !eventId;
+        viewButton.addEventListener("click", function () {
+          if (!eventId) {
+            return;
+          }
+          window.location.href = "event.html?id=" + encodeURIComponent(eventId);
+        });
+
+        actions.appendChild(viewButton);
+
+        content.appendChild(header);
+        content.appendChild(metaGrid);
+        content.appendChild(description);
+        content.appendChild(categoriesRow);
+        content.appendChild(actions);
+
+        layout.appendChild(hero);
+        layout.appendChild(content);
+        card.appendChild(layout);
+        return card;
+      }
+
+      function renderResults(items, appendMode) {
+        if (!appendMode) {
+          refs.results.innerHTML = "";
+          state.renderedCount = 0;
+        }
+
+        refs.emptyState.classList.toggle("hidden", items.length > 0 || state.renderedCount > 0);
+
+        items.forEach(function (item) {
+          refs.results.appendChild(renderResultCard(item));
+        });
+
+        state.renderedCount += items.length;
+      }
+
+      async function runSearch(appendMode) {
+        var query = refs.searchQuery.value.trim();
+        var parsedLimit = parseLimit(refs.searchLimit.value.trim());
+        if (parsedLimit === null) {
+          setStatus("Validation failed: limit must be between 1 and 100.", "error");
+          return;
+        }
+
+        if (!appendMode) {
+          state.query = query;
+          state.limit = parsedLimit;
+          state.nextToken = "";
+          clearResults("Searching...");
+          updateHistory(state.query, state.limit);
+        }
+
+        var params = {};
+        if (state.query) {
+          params.q = state.query;
+        }
+        if (state.query && state.limit) {
+          params.limit = state.limit;
+        }
+        if (appendMode && state.query && state.nextToken) {
+          params.nextToken = state.nextToken;
+        }
+
+        var url = Object.keys(params).length > 0
+          ? appendQueryParams(buildUrl(SEARCH_EVENTS_PATH), params)
+          : buildUrl(SEARCH_EVENTS_PATH);
+        setStatus(
+          appendMode ? "Loading more matches..." : (state.query ? "Searching events..." : "Loading upcoming events..."),
+          "info"
+        );
+
+        try {
+          var response = await fetch(url, { method: "GET" });
+          var text = await response.text();
+          var payload = safeJsonParse(text);
+
+          if (!response.ok) {
+            var message = payload && (payload.error || payload.message) ? String(payload.error || payload.message) : "Search request failed";
+            throw new Error(message + " (" + response.status + ")");
+          }
+
+          var items = pickItems(payload);
+          state.nextToken = state.query ? readText(payload && payload.nextToken, "") : "";
+          renderResults(items, appendMode);
+
+          if (state.renderedCount === 0) {
+            refs.emptyState.classList.remove("hidden");
+            if (state.query) {
+              refs.emptyMessage.textContent = "No events matched \"" + state.query + "\".";
+              setSummary("0 results for \"" + state.query + "\".");
+              setStatus("Search completed with no matches.", "info");
+            } else {
+              refs.emptyMessage.textContent = "No upcoming events are available right now.";
+              setSummary("0 upcoming events returned.");
+              setStatus("Upcoming event list completed with no matches.", "info");
+            }
+          } else {
+            if (state.query) {
+              setSummary(state.renderedCount + " result" + (state.renderedCount === 1 ? "" : "s") + " rendered for \"" + state.query + "\".");
+              setStatus("Showing " + state.renderedCount + " matching event" + (state.renderedCount === 1 ? "" : "s") + ".", "success");
+            } else {
+              setSummary(state.renderedCount + " upcoming event" + (state.renderedCount === 1 ? "" : "s") + " rendered.");
+              setStatus("Showing " + state.renderedCount + " upcoming event" + (state.renderedCount === 1 ? "" : "s") + ".", "success");
+            }
+          }
+
+          refs.loadMoreBtn.classList.toggle("hidden", !state.query || !state.nextToken);
+        } catch (error) {
+          if (!appendMode) {
+            clearResults("Search failed.");
+          }
+          setStatus("Unable to search events: " + error.message, "error");
+        }
+      }
+
+      refs.searchForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        runSearch(false);
+      });
+
+      refs.loadMoreBtn.addEventListener("click", function () {
+        if (!state.nextToken) {
+          return;
+        }
+        runSearch(true);
+      });
+
+      refs.clearSearchBtn.addEventListener("click", function () {
+        refs.searchQuery.value = "";
+        refs.searchLimit.value = "";
+        state.query = "";
+        state.limit = "";
+        state.nextToken = "";
+        clearResults("No search has been run yet.");
+        setStatus("Search cleared. You can search again or load upcoming events with a blank query.", "info");
+        updateHistory("", "");
+      });
+
+      refs.backToConsoleBtn.addEventListener("click", function () {
+        window.location.href = "index.html";
+      });
+
+      refs.openEventPageBtn.addEventListener("click", function () {
+        window.location.href = "event.html";
+      });
+
+      var params = new URLSearchParams(window.location.search);
+      var initialQuery = params.get("q");
+      var initialLimit = params.get("limit");
+      if (initialQuery) {
+        refs.searchQuery.value = initialQuery;
+      }
+      if (initialLimit) {
+        refs.searchLimit.value = initialLimit;
+      }
+
+      clearResults("No search has been run yet.");
+
+      if (initialQuery) {
+        runSearch(false);
+      }
+    }());
+  </script>
+</body>
+</html>

@@ -1,0 +1,190 @@
+    :root {
+      --radford-red: #b11226;
+      --radford-red-dark: #8e0e1e;
+      --navy-accent: #0d1b2a;
+      --mountain-grey: #e5e7eb;
+      --neutral-grey: #6b7280;
+      --light-grey: #f3f4f6;
+      --white: #ffffff;
+      --black: #111827;
+      --radius: 10px;
+      --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --transition: all 0.25s ease;
+      --max-width: 1200px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--light-grey);
+      color: var(--black);
+      line-height: 1.6;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 200 L150 120 L300 180 L450 90 L600 200 L750 110 L900 170 L1050 130 L1200 200 V300 H0 Z' fill='%23d1d5db' opacity='0.4'/%3E%3Cpath d='M0 220 L200 160 L400 200 L600 140 L800 210 L1000 170 L1200 220 V300 H0 Z' fill='%23e5e7eb' opacity='0.6'/%3E%3C/svg%3E");
+      background-repeat: repeat-x;
+      background-position: bottom;
+      background-size: 1200px 300px;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .app-header {
+      background: linear-gradient(135deg, var(--radford-red), var(--radford-red-dark));
+      padding: 1rem 2rem;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .header-inner {
+      max-width: var(--max-width);
+      margin: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .navbar {
+      background-color: var(--navy-accent);
+      color: var(--white);
+      padding: 0.75rem 2rem;
+    }
+
+    .nav-container {
+      max-width: var(--max-width);
+      margin: auto;
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn {
+      padding: 0.6rem 1.2rem;
+      border: none;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 1rem;
+    }
+
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .nav-btn.active {
+      background: var(--radford-red);
+    }
+
+    .main-container {
+      max-width: var(--max-width);
+      margin: 2rem auto;
+      padding: 0 2rem;
+      flex: 1;
+      width: 100%;
+    }
+
+    .mountain-section {
+      background: var(--white);
+      padding: 2rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      min-height: 400px;
+    }
+
+    .ticket-card {
+      background: var(--white);
+      border-left: 6px solid var(--radford-red);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow-soft);
+      transition: var(--transition);
+      position: relative;
+    }
+
+    .ticket-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .ticket-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .ticket-meta {
+      color: var(--neutral-grey);
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .btn-primary {
+      background-color: var(--radford-red);
+      color: var(--white);
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--radford-red-dark);
+    }
+
+    .btn-accent {
+      background-color: var(--navy-accent);
+      color: var(--white);
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      border-radius: var(--radius);
+      border: 2px solid var(--mountain-grey);
+      font-size: 1rem;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--radford-red);
+    }
+
+    .footer {
+      background-color: var(--navy-accent);
+      color: var(--white);
+      text-align: center;
+      padding: 1.5rem;
+      margin-top: 3rem;
+    }
+
+    @media (max-width: 768px) {
+      .header-inner {
+        flex-direction: column;
+        text-align: center;
+      }
+      .main-container {
+        padding: 0 1rem;
+      }
+    }

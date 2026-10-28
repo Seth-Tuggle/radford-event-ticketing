@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Highland Pass | Organizer Studio</title>
+  <link rel="stylesheet" href="mocksite.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="site-header" data-reveal="1">
+      <div class="site-header-inner">
+        <a class="brand" href="index.html">
+          <span class="brand-mark">HP</span>
+          <span class="brand-text">
+            <span class="brand-title">Highland Pass</span>
+            <span class="brand-subtitle">Organizer Studio</span>
+          </span>
+        </a>
+        <nav class="nav-links" aria-label="Primary">
+          <a class="nav-link" href="index.html">Discover</a>
+          <a class="nav-link" href="planner.html">Week Planner</a>
+          <a class="nav-link is-active" href="organizer.html">Organizer Studio</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero-panel" data-reveal="2">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Publishing surface</span>
+            <h1 class="hero-title">Turn backend flows into a usable host dashboard.</h1>
+            <p class="hero-lead">
+              This page uses the create-event flow, image and document presign routes, update-event, and cancel-event. It is intentionally styled like an organizer product instead of a console.
+            </p>
+            <div class="hero-actions">
+              <a class="button" href="#create-studio">Open publishing form</a>
+              <a class="button-soft" href="index.html">Return to discovery</a>
+            </div>
+          </div>
+
+          <aside class="hero-card">
+            <h3>Live publishing rules</h3>
+            <div class="checklist">
+              <div class="checklist-item">Images and documents upload first, then their keys are attached to the create payload.</div>
+              <div class="checklist-item">Muse Banquet Hall layouts are the only ones that attempt ticket sync right now.</div>
+              <div class="checklist-item">This page still points at the live production-stage routes, so publish and cancel carefully.</div>
+            </div>
+            <div id="studioStatus" class="status-banner info is-visible">Draft is ready. Nothing has been sent yet.</div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section" id="create-studio" data-reveal="3">
+        <div class="layout-grid">
+          <div class="editor-panel">
+            <div class="section-head">
+              <div>
+                <div class="eyebrow">Create flow</div>
+                <h2 class="section-title">Publish a new event</h2>
+              </div>
+              <div class="section-copy">
+                Structured inputs for the same create route used by the test console, but shaped like a host-facing editor.
+              </div>
+            </div>
+
+            <form id="createForm" class="form-shell">
+              <div class="field-grid">
+                <div class="field field-span-8">
+                  <label for="eventName">Event name</label>
+                  <input id="eventName" type="text" placeholder="Campus networking night">
+                </div>
+                <div class="field field-span-4">
+                  <label for="seatCount">Seat count</label>
+                  <input id="seatCount" type="number" min="1" step="1" placeholder="200">
+                </div>
+
+                <div class="field field-span-6">
+                  <label for="startDateTime">Start</label>
+                  <input id="startDateTime" type="datetime-local">
+                </div>
+                <div class="field field-span-6">
+                  <label for="endDateTime">End</label>
+                  <input id="endDateTime" type="datetime-local">
+                </div>
+
+                <div class="field field-span-6">
+                  <label for="location">Location label</label>
+                  <input id="location" type="text" placeholder="Muse Banquet Hall">
+                </div>
+                <div class="field field-span-3">
+                  <label for="venueSelect">Venue</label>
+                  <select id="venueSelect"></select>
+                </div>
+                <div class="field field-span-3">
+                  <label for="layoutSelect">Layout</label>
+                  <select id="layoutSelect"></select>
+                </div>
+
+                <div class="field field-span-4">
+                  <label for="budgetPrice">Budget</label>
+                  <input id="budgetPrice" type="number" min="0" step="0.01" value="10">
+                </div>
+                <div class="field field-span-4">
+                  <label for="standardPrice">Standard</label>
+                  <input id="standardPrice" type="number" min="0" step="0.01" value="50">
+                </div>
+                <div class="field field-span-4">
+                  <label for="vipPrice">VIP</label>
+                  <input id="vipPrice" type="number" min="0" step="0.01" value="100">
+                </div>
+
+                <div class="field field-span-12">
+                  <label for="description">Description</label>
+                  <textarea id="description" placeholder="Give attendees a clear sense of the moment, the purpose, and the draw."></textarea>
+                </div>
+
+                <div class="field field-span-12">
+                  <label>Categories</label>
+                  <div id="categoryChooser" class="chip-row"></div>
+                  <div class="helper">Choose at least one live category from the current backend list.</div>
+                </div>
+
+                <div class="field field-span-6">
+                  <label for="imagesInput">Hero and gallery images</label>
+                  <input id="imagesInput" type="file" accept="image/*" multiple>
+                  <div class="helper">The first image becomes the hero asset. Additional images are uploaded as gallery items.</div>
+                  <div id="imageQueue" class="file-list"></div>
+                </div>
+                <div class="field field-span-6">
+                  <label for="documentsInput">Documents</label>
+                  <input id="documentsInput" type="file" multiple>
+                  <div class="helper">Documents are uploaded to signed S3 URLs before the event is created.</div>
+                  <div id="documentQueue" class="file-list"></div>
+                </div>
+              </div>
+
+              <div class="action-row">
+                <button class="button" type="submit">Publish event</button>
+                <button class="button-soft" type="button" id="resetDraftBtn">Reset draft</button>
+              </div>
+            </form>
+          </div>
+
+          <aside class="stack">
+            <section class="summary-panel">
+              <div class="section-head">
+                <div>
+                  <div class="eyebrow">Draft preview</div>
+                  <h3 class="panel-title">What is about to publish</h3>
+                </div>
+              </div>
+              <div class="checklist">
+                <div class="checklist-item"><strong>Draft event ID</strong><br><span id="draftEventId">Generating...</span></div>
+                <div class="checklist-item"><strong>Title</strong><br><span id="previewTitle">Untitled draft</span></div>
+                <div class="checklist-item"><strong>Schedule</strong><br><span id="previewSchedule">Pick start and end times.</span></div>
+                <div class="checklist-item"><strong>Venue mix</strong><br><span id="previewVenue">Choose a venue and layout.</span></div>
+                <div class="checklist-item"><strong>Category mix</strong><br><span id="previewCategories">Select at least one category.</span></div>
+              </div>
+            </section>
+
+            <section class="response-card">
+              <div class="section-head">
+                <div>
+                  <div class="eyebrow">Last API response</div>
+                  <h3 class="panel-title">Transaction log</h3>
+                </div>
+              </div>
+              <pre id="responseOutput" class="response-pre">No requests have been sent yet.</pre>
+            </section>
+
+            <section class="glass-panel">
+              <div class="section-head">
+                <div>
+                  <div class="eyebrow">Update flow</div>
+                  <h3 class="panel-title">Quick change set</h3>
+                </div>
+              </div>
+              <form id="updateForm" class="form-shell">
+                <div class="field-grid">
+                  <div class="field field-span-12">
+                    <label for="updateEventId">Event ID</label>
+                    <input id="updateEventId" type="text" placeholder="Paste an event ID to update">
+                  </div>
+                  <div class="field field-span-12">
+                    <label for="updateDescription">Updated description</label>
+                    <textarea id="updateDescription" placeholder="Optional refresh for the event description."></textarea>
+                  </div>
+                  <div class="field field-span-6">
+                    <label for="updateEndDateTime">Updated end time</label>
+                    <input id="updateEndDateTime" type="datetime-local">
+                  </div>
+                  <div class="field field-span-6">
+                    <label for="updatePricePreset">Quick pricing preset</label>
+                    <select id="updatePricePreset">
+                      <option value="">Leave pricing alone</option>
+                      <option value="student">Student friendly</option>
+                      <option value="premium">Premium night</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="action-row">
+                  <button class="button-soft" type="submit">Save changes</button>
+                </div>
+              </form>
+            </section>
+
+            <section class="warning-card">
+              <div class="section-head">
+                <div>
+                  <div class="eyebrow">Cancel flow</div>
+                  <h3 class="panel-title">Stop an event</h3>
+                </div>
+              </div>
+              <form id="cancelForm" class="form-shell">
+                <div class="field">
+                  <label for="cancelEventId">Event ID</label>
+                  <input id="cancelEventId" type="text" placeholder="Event to cancel">
+                </div>
+                <div class="helper">This sends the live PATCH payload <code>{"status":"CANCELLED"}</code>.</div>
+                <div class="action-row">
+                  <button class="button-danger" type="submit">Cancel event</button>
+                </div>
+              </form>
+            </section>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div>Organizer mock page using create, upload, update, and cancel event flows.</div>
+    </footer>
+  </div>
+
+  <script src="mocksite.js"></script>
+  <script>
+    (function () {
+      var App = window.MockSite;
+      var safe = App.escapeHtml;
+      var state = {
+        draftEventId: App.generateEventId(),
+        selectedCategories: []
+      };
+
+      var refs = {
+        createForm: document.getElementById("createForm"),
+        eventName: document.getElementById("eventName"),
+        seatCount: document.getElementById("seatCount"),
+        startDateTime: document.getElementById("startDateTime"),
+        endDateTime: document.getElementById("endDateTime"),
+        location: document.getElementById("location"),
+        venueSelect: document.getElementById("venueSelect"),
+        layoutSelect: document.getElementById("layoutSelect"),
+        budgetPrice: document.getElementById("budgetPrice"),
+        standardPrice: document.getElementById("standardPrice"),
+        vipPrice: document.getElementById("vipPrice"),
+        description: document.getElementById("description"),
+        categoryChooser: document.getElementById("categoryChooser"),
+        imagesInput: document.getElementById("imagesInput"),
+        documentsInput: document.getElementById("documentsInput"),
+        imageQueue: document.getElementById("imageQueue"),
+        documentQueue: document.getElementById("documentQueue"),
+        resetDraftBtn: document.getElementById("resetDraftBtn"),
+        studioStatus: document.getElementById("studioStatus"),
+        draftEventId: document.getElementById("draftEventId"),
+        previewTitle: document.getElementById("previewTitle"),
+        previewSchedule: document.getElementById("previewSchedule"),
+        previewVenue: document.getElementById("previewVenue"),
+        previewCategories: document.getElementById("previewCategories"),
+        responseOutput: document.getElementById("responseOutput"),
+        updateForm: document.getElementById("updateForm"),
+        updateEventId: document.getElementById("updateEventId"),
+        updateDescription: document.getElementById("updateDescription"),
+        updateEndDateTime: document.getElementById("updateEndDateTime"),
+        updatePricePreset: document.getElementById("updatePricePreset"),
+        cancelForm: document.getElementById("cancelForm"),
+        cancelEventId: document.getElementById("cancelEventId")
+      };
+
+      function setStatus(type, message) {
+        refs.studioStatus.className = "status-banner is-visible " + type;
+        refs.studioStatus.textContent = message;
+      }
+
+      function renderResponse(data) {
+        refs.responseOutput.textContent = typeof data === "string" ? data : JSON.stringify(data, null, 2);
+      }
+
+      function renderFileQueue(target, files) {
+        target.innerHTML = "";
+        var list = Array.from(files || []);
+        if (!list.length) {
+          target.innerHTML = "<div class='file-list-item'><span>No files selected.</span></div>";
+          return;
+        }
+
+        list.forEach(function (file, index) {
+          var row = document.createElement("div");
+          row.className = "file-list-item";
+          row.innerHTML =
+            "<span>" + safe(file.name) + "</span>" +
+            "<span>" + (index === 0 && target === refs.imageQueue ? "hero" : "queued") + "</span>";
+          target.appendChild(row);
+        });
+      }
+
+      function refreshDraftPreview() {
+        var start = App.toApiDateTime(refs.startDateTime.value);
+        var end = App.toApiDateTime(refs.endDateTime.value);
+        refs.draftEventId.textContent = state.draftEventId;
+        refs.previewTitle.textContent = App.readText(refs.eventName.value, "Untitled draft");
+        refs.previewSchedule.textContent = start && end
+          ? App.formatDateTime(start) + " to " + App.formatDateTime(end)
+          : "Pick start and end times.";
+        refs.previewVenue.textContent = refs.venueSelect.value
+          ? refs.venueSelect.value + " / " + refs.layoutSelect.value
+          : "Choose a venue and layout.";
+        refs.previewCategories.textContent = state.selectedCategories.length
+          ? state.selectedCategories.join(", ")
+          : "Select at least one category.";
+      }
+
+      function populateVenueOptions() {
+        refs.venueSelect.innerHTML = "";
+        App.VENUE_LAYOUTS.forEach(function (venue) {
+          var option = document.createElement("option");
+          option.value = venue.venueName;
+          option.textContent = venue.venueName;
+          refs.venueSelect.appendChild(option);
+        });
+      }
+
+      function populateLayoutOptions() {
+        refs.layoutSelect.innerHTML = "";
+        var venueConfig = App.getVenueConfig(refs.venueSelect.value);
+        if (!venueConfig) {
+          return;
+        }
+
+        venueConfig.layouts.forEach(function (layout) {
+          var option = document.createElement("option");
+          option.value = layout.layoutName;
+          option.textContent = layout.layoutName;
+          refs.layoutSelect.appendChild(option);
+        });
+
+        var layoutConfig = App.getLayoutConfig(refs.venueSelect.value, refs.layoutSelect.value);
+        if (layoutConfig && !refs.seatCount.value) {
+          refs.seatCount.value = String(layoutConfig.capacity);
+        }
+      }
+
+      function populateCategoryChooser() {
+        refs.categoryChooser.innerHTML = "";
+        App.CATEGORIES.forEach(function (category) {
+          var button = document.createElement("button");
+          button.type = "button";
+          button.className = "chip";
+          button.textContent = category;
+          button.addEventListener("click", function () {
+            var index = state.selectedCategories.indexOf(category);
+            if (index >= 0) {
+              state.selectedCategories.splice(index, 1);
+              button.classList.remove("is-active");
+            } else {
+              state.selectedCategories.push(category);
+              button.classList.add("is-active");
+            }
+            refreshDraftPreview();
+          });
+          refs.categoryChooser.appendChild(button);
+        });
+      }
+
+      function buildCreatePayload(eventId, imageKeys, documentKeys) {
+        return {
+          event_id: eventId,
+          event_name: refs.eventName.value.trim(),
+          date_time: App.toApiDateTime(refs.startDateTime.value),
+          end_date_time: App.toApiDateTime(refs.endDateTime.value),
+          location: refs.location.value.trim(),
+          venue_name: refs.venueSelect.value.trim(),
+          layout_name: refs.layoutSelect.value.trim(),
+          seat_count: refs.seatCount.value ? Number.parseInt(refs.seatCount.value, 10) : null,
+          budget_price: Number(refs.budgetPrice.value || 0),
+          standard_price: Number(refs.standardPrice.value || 0),
+          vip_price: Number(refs.vipPrice.value || 0),
+          description: refs.description.value.trim(),
+          categories: state.selectedCategories.slice(),
+          images: imageKeys,
+          documents: documentKeys
+        };
+      }
+
+      function validateCreatePayload(payload) {
+        if (!payload.event_name) {
+          return "Event name is required.";
+        }
+        if (!payload.date_time || !payload.end_date_time) {
+          return "Both start and end times are required.";
+        }
+        if (!payload.location) {
+          return "Location is required.";
+        }
+        if (!payload.venue_name || !payload.layout_name) {
+          return "Venue and layout are required.";
+        }
+        if (!payload.categories.length) {
+          return "Select at least one category.";
+        }
+        if (!Number.isInteger(payload.seat_count) || payload.seat_count <= 0) {
+          return "Seat count must be a positive whole number.";
+        }
+        if (!(payload.budget_price < payload.standard_price && payload.standard_price < payload.vip_price)) {
+          return "Pricing must follow budget < standard < vip.";
+        }
+        if (payload.end_date_time <= payload.date_time) {
+          return "End time must be after start time.";
+        }
+        return "";
+      }
+
+      function resetDraft() {
+        state.draftEventId = App.generateEventId();
+        state.selectedCategories = [];
+        refs.createForm.reset();
+        refs.budgetPrice.value = "10";
+        refs.standardPrice.value = "50";
+        refs.vipPrice.value = "100";
+        populateVenueOptions();
+        populateLayoutOptions();
+        populateCategoryChooser();
+        renderFileQueue(refs.imageQueue, []);
+        renderFileQueue(refs.documentQueue, []);
+        refreshDraftPreview();
+        setStatus("info", "Draft reset. Nothing has been published.");
+      }
+
+      async function runCreate(event) {
+        event.preventDefault();
+        var imageFiles = Array.from(refs.imagesInput.files || []);
+        var documentFiles = Array.from(refs.documentsInput.files || []);
+        var payload = buildCreatePayload(state.draftEventId, [], []);
+        var validationError = validateCreatePayload(payload);
+
+        if (validationError) {
+          setStatus("error", validationError);
+          renderResponse({ error: validationError });
+          return;
+        }
+
+        setStatus("info", "Uploading assets, then publishing the event...");
+        renderResponse({ stage: "starting", event_id: state.draftEventId });
+
+        try {
+          var uploaded = await App.uploadAssets(state.draftEventId, imageFiles, documentFiles, function (progress) {
+            setStatus("info", "Working: " + progress.stage + " (" + progress.completed + "/" + progress.total + ")");
+          });
+
+          payload = buildCreatePayload(state.draftEventId, uploaded.imageKeys, uploaded.documentKeys);
+          var created = await App.createEvent(payload);
+          renderResponse(created);
+          setStatus("success", "Event published successfully.");
+
+          var createdId = App.readText(created.event_id, state.draftEventId);
+          refs.updateEventId.value = createdId;
+          refs.cancelEventId.value = createdId;
+          state.draftEventId = App.generateEventId();
+          refreshDraftPreview();
+        } catch (error) {
+          renderResponse(error.data || { error: error.message });
+          setStatus("error", "Publish failed: " + error.message);
+        }
+      }
+
+      async function runUpdate(event) {
+        event.preventDefault();
+        var eventId = refs.updateEventId.value.trim();
+        if (!eventId) {
+          setStatus("error", "Provide an event ID to update.");
+          return;
+        }
+
+        var body = {};
+        var description = refs.updateDescription.value.trim();
+        if (description) {
+          body.description = description;
+        }
+        if (refs.updateEndDateTime.value) {
+          body.end_date_time = App.toApiDateTime(refs.updateEndDateTime.value);
+        }
+        if (refs.updatePricePreset.value === "student") {
+          body.budget_price = 5;
+          body.standard_price = 15;
+          body.vip_price = 25;
+        }
+        if (refs.updatePricePreset.value === "premium") {
+          body.budget_price = 25;
+          body.standard_price = 50;
+          body.vip_price = 90;
+        }
+
+        if (!Object.keys(body).length) {
+          setStatus("error", "Add at least one field before saving changes.");
+          return;
+        }
+
+        setStatus("info", "Saving event updates...");
+        try {
+          var updated = await App.updateEvent(eventId, body);
+          renderResponse(updated);
+          setStatus("success", "Event updated.");
+        } catch (error) {
+          renderResponse(error.data || { error: error.message });
+          setStatus("error", "Update failed: " + error.message);
+        }
+      }
+
+      async function runCancel(event) {
+        event.preventDefault();
+        var eventId = refs.cancelEventId.value.trim();
+        if (!eventId) {
+          setStatus("error", "Provide an event ID to cancel.");
+          return;
+        }
+
+        if (!window.confirm("Cancel event " + eventId + "? This uses the live cancel endpoint.")) {
+          return;
+        }
+
+        setStatus("info", "Sending cancel request...");
+        try {
+          var cancelled = await App.cancelEvent(eventId);
+          renderResponse(cancelled);
+          setStatus("success", "Event cancelled.");
+        } catch (error) {
+          renderResponse(error.data || { error: error.message });
+          setStatus("error", "Cancel failed: " + error.message);
+        }
+      }
+
+      [
+        refs.eventName,
+        refs.seatCount,
+        refs.startDateTime,
+        refs.endDateTime,
+        refs.location,
+        refs.venueSelect,
+        refs.layoutSelect,
+        refs.budgetPrice,
+        refs.standardPrice,
+        refs.vipPrice,
+        refs.description
+      ].forEach(function (input) {
+        input.addEventListener("input", refreshDraftPreview);
+        input.addEventListener("change", refreshDraftPreview);
+      });
+
+      refs.venueSelect.addEventListener("change", function () {
+        populateLayoutOptions();
+        refreshDraftPreview();
+      });
+
+      refs.layoutSelect.addEventListener("change", function () {
+        var layoutConfig = App.getLayoutConfig(refs.venueSelect.value, refs.layoutSelect.value);
+        if (layoutConfig && !refs.seatCount.value) {
+          refs.seatCount.value = String(layoutConfig.capacity);
+        }
+        refreshDraftPreview();
+      });
+
+      refs.imagesInput.addEventListener("change", function () {
+        renderFileQueue(refs.imageQueue, refs.imagesInput.files);
+      });
+
+      refs.documentsInput.addEventListener("change", function () {
+        renderFileQueue(refs.documentQueue, refs.documentsInput.files);
+      });
+
+      refs.createForm.addEventListener("submit", runCreate);
+      refs.updateForm.addEventListener("submit", runUpdate);
+      refs.cancelForm.addEventListener("submit", runCancel);
+      refs.resetDraftBtn.addEventListener("click", resetDraft);
+
+      resetDraft();
+    }());
+  </script>
+</body>
+</html>
