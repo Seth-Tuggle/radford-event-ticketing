@@ -1,5 +1,10 @@
 # `src/` — React Single-Page Application
 
+> **Historical coursework:** These notes describe the frontend used for the
+> CS472 class project. The shared class APIs and configuration are not supplied
+> as a working standalone environment. Dependencies and services may be outdated,
+> deprecated, or unavailable; the source is kept for reference.
+
 This directory contains the React side of the Radford Events Ticketing
 app. The static seat-map page lives in `../public/venue.html` and is
 documented separately. See the project root `README.md` for the
@@ -32,8 +37,8 @@ src/
 │   │                       updated via the "cartUpdated" custom
 │   │                       event and the native "storage" event.
 │   ├── EventBoard.jsx    ← Landing page. Fetches events from the
-│   │                       Team02 endpoint, falls back to local
-│   │                       MOCK_EVENTS if the API is unreachable.
+│   │                       Team02 endpoint; shows an empty list
+│   │                       when the request fails.
 │   ├── Cart.jsx          ← Cart review and checkout. Renders one
 │   │                       row per cart item plus the timer and
 │   │                       the expiry modal.
@@ -65,11 +70,11 @@ If you've never seen this code before, walk it in this order:
 
 1. `main.jsx` — what gets mounted and where.
 2. `App.jsx` — the routes and the SSO callback path.
-3. `services/ApiService.js` — every backend call we make, in one place.
+3. `services/ApiService.js` — shared API helpers and endpoint mapping.
 4. `hooks/useTicketCart.js` — how cart state is shared with `venue.html`.
 5. `components/Cart.jsx` — how the cart UI consumes the hook.
 6. `components/CartTimer.jsx` — how the expiry countdown works.
-7. `components/EventBoard.jsx` — the landing page and its fallback.
+7. `components/EventBoard.jsx` — the landing page and API failure handling.
 8. `components/MyTickets.jsx` — how QR codes are fetched and rendered.
 9. `auth.js` — the full Cognito PKCE flow with token storage.
 10. `components/Login.jsx` — how the auth UI calls into `auth.js`.
@@ -91,7 +96,7 @@ If you've never seen this code before, walk it in this order:
   crashes. Components are responsible for showing friendly error
   states.
 
-## Adding a new page
+## Original page-extension workflow
 
 1. Create the component in `components/`.
 2. Add a `<Route>` for it inside `<Routes>` in `App.jsx`.
