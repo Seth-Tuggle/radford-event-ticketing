@@ -1,5 +1,12 @@
 # Radford Events Ticketing
 
+> **Historical coursework:** This frontend is preserved as part of the original
+> CS472 class project. It depended on shared class APIs and AWS services. It is
+> not maintained as a standalone application; dependencies and services may be
+> outdated, deprecated, or unavailable. The architecture and commands below are
+> historical reference, not a verified local setup. Event browsing requires a
+> working API and shows an empty list on failure; there is no mock-event fallback.
+
 A web application for browsing campus events, reserving seats with a live
 hold-and-checkout flow, and viewing purchased tickets with QR codes.
 Built for CS472 at Radford University.
@@ -42,9 +49,8 @@ page for interactive seat selection. The two halves share state through
 ### Why a hybrid?
 The React app handles routing, auth, and the cart UI. The seat map
 lives in a separate static page because it pre-dates the React rewrite
-and rendering thousands of seat divs is faster outside React's
-reconciler. Both pages share the same `localStorage` keys and the same
-backend `cart_id` so the user experiences a single seamless flow.
+and uses a separate vanilla JavaScript renderer. Both pages share
+`localStorage` keys and the backend `cart_id` to coordinate the flow.
 
 ## Project layout
 
@@ -130,7 +136,10 @@ backend team owns a different slice of the API. See
 | Team05 | Cognito authentication                     |
 | Team07 | API Gateway and User Management            |
 
-## Local development
+## Historical development commands
+
+These commands describe the original development workflow and still require the
+class service configuration; they are retained as reference.
 
 ```bash
 npm install
@@ -150,16 +159,15 @@ For a developer new to the codebase, read in this order:
 
 1. `src/main.jsx` — entry point and provider setup.
 2. `src/App.jsx` — route map and SSO callback handling.
-3. `src/services/ApiService.js` — every backend call lives here.
+3. `src/services/ApiService.js` — shared API helpers and endpoint mapping.
 4. `src/hooks/useTicketCart.js` — the central cart state machine.
 5. `public/venue-app.js` — the seat-map page (start with the
    `DOMContentLoaded` listener at the bottom — it's the entry point).
 6. `src/components/Cart.jsx` and `src/components/CartTimer.jsx` —
    how the React side renders the cart and the expiry timer.
 
-Every file in `src/` and `public/` carries a top-of-file JSDoc block
-explaining its purpose, the data it owns, and how it interacts with
-the rest of the system.
+The source includes JSDoc blocks describing module responsibilities, shared
+data, and interactions with the rest of the system.
 
 ---
 
