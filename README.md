@@ -38,5 +38,3 @@ Recovered snapshots from separate teams/stages have been kept in separate folder
 This is not a complete independently deployable copy of every team's backend.
 The original school deployment has not been used during recovery. Authentication
 and transaction code remain coursework prototypes, not a production readiness claim.
-
-See `RECOVERY_NOTES.md` for snapshot provenance.
